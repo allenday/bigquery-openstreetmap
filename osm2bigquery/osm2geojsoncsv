@@ -57,7 +57,7 @@ fi
 # the option below can be helpful for some hardware configurations:
 # --config OSM_COMPRESS_NODES YES
 # GDAL_CACHEMAX and OSM_MAX_TMPFILE_SIZE defined in MB
-# for GDAL_CACHEMAX=400 and OSM_MAX_TMPFILE_SIZE=400 recommended RAM >= 4GB
+# for GDAL_CACHEMAX=4000 and OSM_MAX_TMPFILE_SIZE=4000 recommended RAM=60GB
 for ogrtype in points lines multilinestrings multipolygons other_relations
 do
     if [ "$ogrtype" = "multipolygons" ]
@@ -74,10 +74,11 @@ do
     "${NAME}-${ogrtype}.geojson.csv" "${OSMNAME}" \
     --config OSM_CONFIG_FILE "${OGRCONFIG}" \
     --config OGR_INTERLEAVED_READING YES \
-    --config GDAL_CACHEMAX 400 \
-    --config OSM_MAX_TMPFILE_SIZE 400 \
+    --config GDAL_CACHEMAX 4000 \
+    --config OSM_MAX_TMPFILE_SIZE 4000 \
     -dialect sqlite \
-    -sql "select AsGeoJSON(geometry) AS geometry, ${osm_fields}, replace(all_tags,X'0A','') as all_tags from ${ogrtype}" \
+    -sql "select AsGeoJSON(geometry) AS geometry, ${osm_fields}, replace(all_tags,X'0A','') \
+        as all_tags from ${ogrtype} where ST_IsValid(geometry) = 1" \
     --debug on \
     2>"${NAME}-${ogrtype}.debug.log" \
     &
