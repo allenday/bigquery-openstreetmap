@@ -1,4 +1,4 @@
-2#!/bin/sh
+#!/bin/sh
 
 for LAYER in hotel motel bed_and_breakfast guest_house hostel chalet camp_site alpine_hut \
     caravan_site information attraction museum artwork picnic_site viewpoint zoo theme_park

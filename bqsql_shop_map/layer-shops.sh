@@ -1,4 +1,4 @@
-2#!/bin/sh
+#!/bin/sh
 
 for LAYER in supermarket bakery kiosk mall department_store convenience clothes florist chemist \
     books butcher shoes alcohol beverages optician jewelry gift sports stationery outdoor \
