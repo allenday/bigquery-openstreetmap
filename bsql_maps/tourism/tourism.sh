@@ -17,5 +17,5 @@ SELECT
   osm_id,NULL AS osm_way_id,osm_version,osm_timestamp,all_tags,geometry
 FROM \`openstreetmap-public-data-dev.osm_planet.other_relations\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='${LAYER}');
-" > "layer-tourism-${LAYER}.sql"
+" > "tourism-${LAYER}.sql"
 done
