@@ -64,7 +64,7 @@ do
     then
         osm_fields="osm_id,osm_way_id,osm_version,osm_timestamp"
     else
-        osm_fields="osm_id,osm_version,osm_timestamp"
+        osm_fields="osm_id,NULL AS osm_way_id,osm_version,osm_timestamp"
     fi
     echo "Processing ${ogrtype} with OSM fields ${osm_fields}"
 
