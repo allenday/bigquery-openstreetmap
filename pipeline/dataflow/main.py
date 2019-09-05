@@ -12,7 +12,7 @@ from apache_beam.io.gcp import bigquery
 from apache_beam.io.gcp.bigquery_file_loads import BigQueryBatchFileLoads
 
 CSV_HEADERS = ['geometry', 'osm_id', 'osm_way_id', 'osm_version', 'osm_timestamp', 'all_tags']
-bigquery.WriteToBigQuery
+
 BQ_SCHEMA = {
     "fields": [
         {
