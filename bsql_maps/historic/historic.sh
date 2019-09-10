@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for LAYER in monument memorial castle ruins archaeological_site wayside_criss wayside_shrine \
+for LAYER in monument memorial castle ruins archaeological_site wayside_cross wayside_shrine \
     battlefield fort
 do
     echo "SELECT
