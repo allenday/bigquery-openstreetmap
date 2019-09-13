@@ -12,20 +12,16 @@ import google.auth
 GCP_PROJECT = os.environ['GCP_PROJECT']
 DF_TEMPLATE = os.environ['DF_TEMPLATE']
 DF_WORKING_BUCKET = os.environ['DF_WORKING_BUCKET']
-PUBSUB_DF_TOPIC = os.environ['PUBSUB_DF_TOPIC']
 BQ_DATASET = os.environ['BQ_DATASET']
 
 
-def publish_pubsub(df_api_response):
-    from google.cloud import pubsub
+def init_df(bucket: str, input_filename: str):
+    """Launching Dataflow job based on template
 
-    ps_topic = f'projects/{GCP_PROJECT}/topics/{PUBSUB_DF_TOPIC}'
-    publisher = pubsub.PublisherClient()
-    r = publisher.publish(ps_topic, json.dumps(df_api_response).encode())
-    r.result()
+    :param bucket: name of bucket (without gs://)
+    :param input_filename: name of object (file) in bucket, expected format is for example planet-latest-lines.geojson.csv
 
-
-def init_df(bucket, input_filename):
+    """
     input_path = f'gs://{bucket}/{input_filename}'
 
     bq_table = input_filename.split('.')[0].split('-')[-1]
@@ -41,9 +37,6 @@ def init_df(bucket, input_filename):
         },
         "environment": {
             "tempLocation": f"{DF_WORKING_BUCKET}/df_temp",
-            # "network": "dataflow",
-            # "no_use_public_ips": True
-            # "usePublicIps": False
         },
 
     }
@@ -52,8 +45,6 @@ def init_df(bucket, input_filename):
 
     request = service.projects().templates().launch(projectId=GCP_PROJECT, gcsPath=DF_TEMPLATE, body=body)
     response = request.execute()
-
-    publish_pubsub(response)
 
     logging.info(response)
 

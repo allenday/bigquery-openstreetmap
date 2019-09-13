@@ -1,3 +1,3 @@
 DF_TEMPLATE: gs://openstreetmap-public-data-dev/df_template/process_geojson
 DF_WORKING_BUCKET: gs://openstreetmap-public-data-dev
-BQ_DATASET: osm_planet
+BQ_DATASET: osm_test

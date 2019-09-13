@@ -1,0 +1,3 @@
+google-cloud-storage==1.19.0
+google-api-python-client==1.7.11
+google-cloud-bigquery==1.19.0
