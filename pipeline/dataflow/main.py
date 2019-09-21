@@ -1,3 +1,7 @@
+"""
+Beam pipeline that reads OSM GeoJSON file, transforms it and uploads to BigQuery
+"""
+
 import re
 import csv
 import sys

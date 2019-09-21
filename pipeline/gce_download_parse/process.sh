@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
 
-# download file
-echo "downloading"
-OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
 
 OSM_FILENAME="$(basename $OSM_URL)"
 FILENAME_BASE="${OSM_FILENAME//.osm.pbf/""}"
+
+# download file
+echo "downloading"
 
 wget $OSM_URL
 echo "downloading completed"
 # parse
 
-./osm2geojsoncsv.sh $OSM_FILENAME $FILENAME_BASE
+./osm2geojsoncsv $OSM_FILENAME $FILENAME_BASE
 
 # upload
-find . -name '*.csv' -exec gsutil -m cp {} gs://planet-latest-multilinestrings.debug.log/ \;
+find . -name '*.csv' -exec gsutil -m cp {} $GCS_GEOJSON_BUCKET \;
+
+# wait for Dataflow job to start
+sleep 120s
+
+# publish pubsub message so we can check when datflow jobs are done
+gcloud pubsub topics publish $DF_JOBS_PS_TOPIC --message " "
 
 # shutdown
 gcloud compute instances delete $(hostname) --zone \

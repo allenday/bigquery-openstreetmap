@@ -1,10 +1,10 @@
 #!/bin/bash
 
 export DEBIAN_FRONTEND=noninteractive
-export GCS_BUCKET=gs://openstreetmap-public-data-dev
-export DF_JOBS_PS_TOPIC=check-df-jobs
-export OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
-export GCS_GEOJSON_BUCKET=gs://openstreetmap-public-data-dev-geojson/
+export GCS_BUCKET=gs://openstreetmap-public-data-dev-test
+export DF_JOBS_PS_TOPIC=check-df-jobs-test
+export OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
+export GCS_GEOJSON_BUCKET=gs://openstreetmap-public-data-dev-geojson-test/
 
 echo "deb http://ftp.us.debian.org/debian/ sid main contrib non-free" | sudo tee -a /etc/apt/sources.list
 echo "deb-src http://ftp.us.debian.org/debian/ sid main" | sudo tee -a /etc/apt/sources.list
@@ -29,7 +29,7 @@ gsutil cp $GCS_BUCKET/process.sh ~/
 
 
 cd ~/ || exit
-chmod +x set_env_vars.sh
+chmod +x set_env_vars_test.sh
 chmod +x osm2geojsoncsv
 chmod +x process.sh
 
