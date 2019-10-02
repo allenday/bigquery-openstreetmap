@@ -1,5 +1,5 @@
 
-#Data pipeline
+# Data pipeline
 data pipeline consists of several steps:  
 1. Cloud Function which starts Compute Engine instance. Cloud Function is triggered by Cloud Scheduler.  
 2. GCE instance downloads OSM file, parses it and uploads to Cloud Storage. 
@@ -18,7 +18,7 @@ folders represents concrete steps:
 `gce_download_parse` - bash scripts which are executed in GCE instance
 
 
-#General info
+#G eneral info
 All code that in `pipeline` folder was developed/runs on Python 3.7  
 Settings for Cloud functions are stored via `env.yaml` files and set during deployment
 

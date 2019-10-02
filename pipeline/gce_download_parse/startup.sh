@@ -1,10 +1,10 @@
 #!/bin/bash
 
 export DEBIAN_FRONTEND=noninteractive
-export GCS_BUCKET=gs://openstreetmap-public-data-dev
-export DF_JOBS_PS_TOPIC=check-df-jobs
+export GCS_BUCKET=gs://openstreetmap-public-data-prod
+export PS_TOPIC_DF_JOBS=check-df-jobs
 export OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
-export GCS_GEOJSON_BUCKET=gs://openstreetmap-public-data-dev-geojson/
+export GCS_GEOJSON_BUCKET=gs://openstreetmap-public-data-geojson-prod/
 
 echo "deb http://ftp.us.debian.org/debian/ sid main contrib non-free" | sudo tee -a /etc/apt/sources.list
 echo "deb-src http://ftp.us.debian.org/debian/ sid main" | sudo tee -a /etc/apt/sources.list

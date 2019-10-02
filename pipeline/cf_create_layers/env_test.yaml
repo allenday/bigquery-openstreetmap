@@ -1,4 +1,0 @@
-BUCKET: openstreetmap-public-data-dev
-TABLE_NAME: osm_layers
-DATASET_NAME: osm_test
-TEMP_DATASET_NAME: osm_temp
