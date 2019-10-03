@@ -3,7 +3,7 @@
 
 LAYERS=$(find . -name '*.sql' -exec basename '{}' .sql \; | sort)
 
-echo "CREATE OR REPLACE FUNCTION \`openstreetmap-public-data-dev.osm_planet.name2partnum\`(name STRING)
+echo "CREATE OR REPLACE FUNCTION \`${GCP_PROJECT}.${BQ_DATASET}.name2partnum\` (name STRING)
   RETURNS DATE
   AS (CAST(TIMESTAMP_ADD(TIMESTAMP \"1970-01-01\", INTERVAL (CASE"
 N=1

@@ -173,5 +173,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-/pipeline/env_variables.sh
