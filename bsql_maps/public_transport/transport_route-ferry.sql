@@ -1,4 +1,4 @@
 SELECT
-    'route-ferry' AS name, *
+    'transport_route-ferry' AS name, *
 FROM `openstreetmap-public-data-dev.osm_planet.multilinestrings`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'route' AND tags.value='ferry')

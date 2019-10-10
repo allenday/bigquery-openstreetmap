@@ -1,31 +1,31 @@
 WITH city AS (
 	SELECT
-		osm_layers.name as osm_name,
-		osm_layers.all_tags AS osm_tags,
+		layers.name as osm_name,
+		layers.all_tags AS osm_tags,
 		(SELECT tags.value FROM UNNEST(all_tags) as tags WHERE tags.key = 'admin_level') as admin_level,
-		osm_layers.geometry AS geometry
-	FROM `openstreetmap-public-data-dev.osm_planet.osm_layers_partitions` AS osm_layers
-	WHERE osm_layers.partnum = `openstreetmap-public-data-dev.osm_planet.name2partnum`('boundary-administrative')
+		layers.geometry AS geometry
+	FROM `openstreetmap-public-data-dev.osm_planet.layers` AS layers
+	WHERE layers.partnum = `openstreetmap-public-data-dev.osm_planet.name2partnum`('boundary-administrative')
 		AND EXISTS(SELECT tags.value FROM UNNEST(all_tags) as tags WHERE tags.key = 'name' and tags.value='New York')
 		AND EXISTS(SELECT tags.value FROM UNNEST(all_tags) as tags WHERE tags.key = 'place' and tags.value='city')
 ),
 city_buildings AS (
 	SELECT
-		osm_layers.*
-	FROM `openstreetmap-public-data-dev.osm_planet.osm_layers_partitions` AS osm_layers, city
-	WHERE osm_layers.partnum = `openstreetmap-public-data-dev.osm_planet.name2partnum`('building')
-		AND ST_DWITHIN(city.geometry, osm_layers.geometry, 0)
+		layers.*
+	FROM `openstreetmap-public-data-dev.osm_planet.layers` AS layers, city
+	WHERE layers.partnum = `openstreetmap-public-data-dev.osm_planet.name2partnum`('building')
+		AND ST_DWITHIN(city.geometry, layers.geometry, 0)
 		-- ignore incorrect geometries with wrong orientation (see GeoJSON RFC 7946)
-		AND ST_AREA(osm_layers.geometry) <= 1E10
+		AND ST_AREA(layers.geometry) <= 1E10
 ),
 city_parks AS (
 	SELECT
-		osm_layers.*
-	FROM `openstreetmap-public-data-dev.osm_planet.osm_layers_partitions` AS osm_layers, city
-	WHERE osm_layers.partnum = `openstreetmap-public-data-dev.osm_planet.name2partnum`('leisure-park')
-		AND ST_DWITHIN(city.geometry, osm_layers.geometry, 0)
+		layers.*
+	FROM `openstreetmap-public-data-dev.osm_planet.layers` AS layers, city
+	WHERE layers.partnum = `openstreetmap-public-data-dev.osm_planet.name2partnum`('leisure-park')
+		AND ST_DWITHIN(city.geometry, layers.geometry, 0)
 		-- ignore incorrect geometries with wrong orientation (see GeoJSON RFC 7946)
-		AND ST_AREA(osm_layers.geometry) <= 1E10
+		AND ST_AREA(layers.geometry) <= 1E10
 ),
 city_buildings_parks AS (
 	SELECT
