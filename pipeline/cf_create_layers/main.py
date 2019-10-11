@@ -13,7 +13,7 @@ from google.api_core.exceptions import NotFound
 
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
-BUCKET = os.environ['BUCKET']
+BUCKET = os.environ['BUCKET'].replace('gs://', '')
 TABLE_NAME = os.environ['TABLE_NAME']
 DATASET_NAME = os.environ['DATASET_NAME']
 TEMP_DATASET_NAME = os.environ['TEMP_DATASET_NAME']
@@ -136,4 +136,5 @@ def main(data, context):
 
 
 if __name__ == '__main__':
-    create_layer_partitioned_table()
+    logging.basicConfig(level=logging.DEBUG)
+    process()
