@@ -13,7 +13,7 @@ from google.api_core.exceptions import NotFound
 
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
-BUCKET = os.environ['BUCKET']
+BUCKET = os.environ['BUCKET'].replace('gs://', '')
 TABLE_NAME = os.environ['TABLE_NAME']
 DATASET_NAME = os.environ['DATASET_NAME']
 TEMP_DATASET_NAME = os.environ['TEMP_DATASET_NAME']
@@ -24,15 +24,16 @@ temp_dataset_ref = bigquery.DatasetReference(GCP_PROJECT, TEMP_DATASET_NAME)
 temp_table_ref = bigquery.TableReference(temp_dataset_ref, TABLE_NAME)
 
 
-def delete_temp_table():
-    """Deletes temporary BigQuery table"""
+def create_temp_dataset():
+    """Creates temporary dataset"""
 
-    try:
-        bq.get_table(temp_table_ref)
-        bq.delete_table(temp_table_ref)
-        logging.info("deleted temp table")
-    except NotFound:
-        pass
+    bq.create_dataset(temp_dataset_ref, exists_ok=True)
+
+
+def delete_temp_dataset():
+    """Deletes temporary BigQuery dataset and table"""
+
+    bq.delete_dataset(temp_dataset_ref, delete_contents=True, not_found_ok=True)
 
 
 def get_queries() -> List[str]:
@@ -86,6 +87,23 @@ def copy_table():
     bq.copy_table(temp_table_ref, table_ref, job_config=copyjob_config)
 
 
+def create_layer_partitioned_table():
+    """Creates layer partitioned table"""
+
+    table_name = f"{TABLE_NAME}_partitions"
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
+    PARTITION BY partnum
+    AS
+    SELECT
+    *,
+    `{GCP_PROJECT}.{DATASET_NAME}`.name2partnum(name) as partnum
+    FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
+
+    job_config = bigquery.QueryJobConfig()
+    job_config.priority = bigquery.job.QueryPriority.BATCH
+    query_job = bq.query(sql_query, job_config=job_config)
+
+
 def wait_jobs_completed():
     """Checks if all BigQuery jobs are completed so it can copy temp table"""
 
@@ -103,12 +121,20 @@ def wait_jobs_completed():
 
 def process():
     """Complete flow"""
-    delete_temp_table()
+
+    create_temp_dataset()
     queries = get_queries()
     create_query_jobs(queries)
     wait_jobs_completed()
     copy_table()
+    create_layer_partitioned_table()
+    delete_temp_dataset()
 
 
 def main(data, context):
+    process()
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     process()

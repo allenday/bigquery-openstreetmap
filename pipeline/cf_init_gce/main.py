@@ -25,7 +25,8 @@ def get_info(instance_name: str):
 
     request = service.instances().get(project=GCP_PROJECT, zone=GCE_ZONE, instance=instance_name)
     response = request.execute()
-    print(response)
+    from pprint import pprint
+    pprint(response)
 
 
 def create_vm():
@@ -59,10 +60,10 @@ def create_vm():
                 'value': SCRIPT_URL,
             }
         ]},
-        'serviceAccounts': {
+        'serviceAccounts': [{
             'email': SERVICE_ACCOUNT_EMAIL,
             'scopes': ['https://www.googleapis.com/auth/cloud-platform']
-        }
+        }]
     }
     request = service.instances().insert(project=GCP_PROJECT, zone=GCE_ZONE, body=body)
     response = request.execute()
