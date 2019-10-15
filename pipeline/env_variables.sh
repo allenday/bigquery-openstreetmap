@@ -23,7 +23,7 @@ export DATAFLOW_TEMPLATE_LOCATION=$GCS_BUCKET/df_template/process_geojson
 
 # BigQuery
 export BQ_DATASET=osm_planet
-export BQ_LAYERS_TABLE=osm_layers
+export BQ_LAYERS_TABLE=layers
 export BQ_TEMP_DATASET=osm_temp
 
 # PubSub topics
