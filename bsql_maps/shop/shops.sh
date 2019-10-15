@@ -7,17 +7,17 @@ for LAYER in supermarket bakery kiosk mall department_store convenience clothes 
 do
     echo "SELECT
   'shop-${LAYER}' AS name, *
-FROM \`openstreetmap-public-data-dev.osm_planet.points\`
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.points\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'shop' AND tags.value='${LAYER}')
 UNION ALL
 SELECT
   'shop-${LAYER}' AS name, *
-FROM \`openstreetmap-public-data-dev.osm_planet.multipolygons\`
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.multipolygons\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'shop' AND tags.value='${LAYER}')
 UNION ALL
 SELECT
   'shop-${LAYER}' AS name, *
-FROM \`openstreetmap-public-data-dev.osm_planet.other_relations\`
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.other_relations\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'shop' AND tags.value='${LAYER}')
 " > "shop-${LAYER}.sql"
 done
