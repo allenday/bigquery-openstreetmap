@@ -90,7 +90,7 @@ def copy_table():
 def create_layer_partitioned_table():
     """Creates layer partitioned table"""
 
-    table_name = f"{TABLE_NAME}_partitions"
+    table_name = f"{TABLE_NAME}_partitioned"
     sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
     PARTITION BY partnum
     AS
