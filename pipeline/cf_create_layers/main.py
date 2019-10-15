@@ -96,7 +96,7 @@ def create_layer_partitioned_table():
     AS
     SELECT
     *,
-    `{GCP_PROJECT}.{DATASET_NAME}`.name2partnum(name) as partnum
+    `{GCP_PROJECT}.{DATASET_NAME}`.layername2partition(name) as partnum
     FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
 
     job_config = bigquery.QueryJobConfig()
