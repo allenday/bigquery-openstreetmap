@@ -9,17 +9,17 @@ for LAYER in police fire_station post_box post_office telephone library townhall
 do
     echo "SELECT
   'amenity-${LAYER}' AS name, *
-FROM \`openstreetmap-public-data-dev.osm_planet.points\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='${LAYER}')
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.points\`
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) AS tags WHERE tags.key = 'amenity' AND tags.value='${LAYER}')
 UNION ALL
 SELECT
   'amenity-${LAYER}' AS name, *
-FROM \`openstreetmap-public-data-dev.osm_planet.multipolygons\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='${LAYER}')
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.multipolygons\`
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) AS tags WHERE tags.key = 'amenity' AND tags.value='${LAYER}')
 UNION ALL
 SELECT
   'amenity-${LAYER}' AS name, *
-FROM \`openstreetmap-public-data-dev.osm_planet.other_relations\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='${LAYER}')
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.other_relations\`
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) AS tags WHERE tags.key = 'amenity' AND tags.value='${LAYER}')
 " > "amenity-${LAYER}.sql"
 done
