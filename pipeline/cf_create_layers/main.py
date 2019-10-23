@@ -11,12 +11,13 @@ from google.cloud import bigquery
 from google.cloud import storage
 from google.api_core.exceptions import NotFound
 
+from copy_public_tables import copy_tables_to_public_dataset
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
-BUCKET = os.environ['BUCKET'].replace('gs://', '')
-TABLE_NAME = os.environ['TABLE_NAME']
-DATASET_NAME = os.environ['DATASET_NAME']
-TEMP_DATASET_NAME = os.environ['TEMP_DATASET_NAME']
+BUCKET = os.environ['GCS_BUCKET'].replace('gs://', '')
+TABLE_NAME = os.environ['BQ_LAYERS_TABLE']
+DATASET_NAME = os.environ['BQ_DATASET']
+TEMP_DATASET_NAME = os.environ['BQ_TEMP_DATASET']
 
 bq = bigquery.Client(project=GCP_PROJECT)
 
@@ -100,7 +101,7 @@ def create_layer_partitioned_table():
     FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
 
     job_config = bigquery.QueryJobConfig()
-    job_config.priority = bigquery.job.QueryPriority.BATCH
+    # job_config.priority = bigquery.job.QueryPriority.BATCH
     query_job = bq.query(sql_query, job_config=job_config)
 
 
@@ -129,6 +130,7 @@ def process():
     copy_table()
     create_layer_partitioned_table()
     delete_temp_dataset()
+    copy_tables_to_public_dataset()
 
 
 def main(data, context):
@@ -137,4 +139,4 @@ def main(data, context):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    process()
+    # process()
