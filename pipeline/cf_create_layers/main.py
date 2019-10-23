@@ -13,10 +13,10 @@ from google.api_core.exceptions import NotFound
 
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
-BUCKET = os.environ['BUCKET'].replace('gs://', '')
-TABLE_NAME = os.environ['TABLE_NAME']
-DATASET_NAME = os.environ['DATASET_NAME']
-TEMP_DATASET_NAME = os.environ['TEMP_DATASET_NAME']
+BUCKET = os.environ['GCS_BUCKET'].replace('gs://', '')
+TABLE_NAME = os.environ['BQ_LAYERS_TABLE']
+DATASET_NAME = os.environ['BQ_DATASET']
+TEMP_DATASET_NAME = os.environ['BQ_TEMP_DATASET']
 
 bq = bigquery.Client(project=GCP_PROJECT)
 
