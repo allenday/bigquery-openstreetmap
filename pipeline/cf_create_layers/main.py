@@ -101,7 +101,6 @@ def create_layer_partitioned_table():
     FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
 
     job_config = bigquery.QueryJobConfig()
-    # job_config.priority = bigquery.job.QueryPriority.BATCH
     query_job = bq.query(sql_query, job_config=job_config)
 
 
@@ -120,6 +119,25 @@ def wait_jobs_completed():
         time.sleep(30)
 
 
+def create_features_table():
+    """creates 'features' table which is union of all 5 tables"""
+
+    table_name = 'features'
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
+    AS
+    SELECT osm_id, osm_way_id, 'line' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.lines`
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'multilinestring' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multilinestrings`
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'multipolygon' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multipolygons`
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'other_relation' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.other_relations` 
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'point' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
+    """
+    query_job = bq.query(sql_query)
+
+
 def process():
     """Complete flow"""
 
@@ -129,6 +147,7 @@ def process():
     wait_jobs_completed()
     copy_table()
     create_layer_partitioned_table()
+    create_features_table()
     delete_temp_dataset()
     copy_tables_to_public_dataset()
 
