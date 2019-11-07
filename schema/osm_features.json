@@ -1,0 +1,55 @@
+[
+   {
+      "type":"INTEGER",
+      "name":"osm_id",
+      "description": "Object unique ID where feature_type=node or feature_type=relation, otherwise null."
+   },
+   {
+      "type":"INTEGER",
+      "name":"osm_way_id",
+      "description": "Object unique ID where feature_type=way, otherwise null."
+   },
+   {
+      "type":"INTEGER",
+      "name":"osm_version",
+      "description": "Version number for this object."
+   },
+   {
+      "type":"TIMESTAMP",
+      "name":"osm_timestamp",
+      "description": "Last-modified timestamp for this object."
+   },
+   {
+      "type":"RECORD",
+      "mode":"REPEATED",
+      "name":"all_tags",
+      "description": "Unstructured key=value attributes for this object.",
+      "fields":[
+         {
+            "type":"STRING",
+            "name":"key",
+            "description": "Attribute key."
+         },
+         {
+            "type":"STRING",
+            "name":"value",
+            "description": "Attribute value."
+         }
+      ]
+   },
+   {
+      "type":"GEOGRAPHY",
+      "name":"geometry",
+      "description": "GEOGRAPHY-encoded object"
+   },
+   {
+      "type":"STRING",
+      "name":"feature_type",
+      "description": "OpenStreetMap feature type. One of: node, way, relation"
+   },
+   {
+      "type":"STRING",
+      "name":"feature_partition",
+      "description": "Partitioning field for query optimization, see get_partitions(STRING) function"
+   }
+]
