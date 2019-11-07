@@ -58,6 +58,7 @@
       "name":"layer_name",
       "description": "Geofabrik layer name, a friendly name for layer_code. Example: 'village'"
    },
+   {
       "type":"STRING",
       "name":"gdal_type",
       "description":"OpenStreetMap feature type. One of: point, line, multilinestring, multipolygon, other_relation"
