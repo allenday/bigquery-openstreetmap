@@ -17,58 +17,7 @@ from apache_beam.io.gcp.bigquery_file_loads import BigQueryBatchFileLoads
 
 CSV_HEADERS = ['geometry', 'osm_id', 'osm_way_id', 'osm_version', 'osm_timestamp', 'all_tags']
 
-BQ_SCHEMA = {
-    "fields": [
-        {
-            "description": "Object unique ID for all tables except multipolygon. Null for multipolygon.",
-            "type": "INTEGER",
-            "name": "osm_id"
-        },
-        {
-            "description": "Object unique ID for multipolygon table, otherwise null.",
-            "type": "INTEGER",
-            "name": "osm_way_id"
-        },
-        {
-            "description": "Version number for this object.",
-            "type": "INTEGER",
-            "name": "osm_version"
-        },
-        {
-            "description": "Last-modified timestamp for this object.",
-            "type": "TIMESTAMP",
-            "name": "osm_timestamp"
-        },
-        {
-            "description": "Unstructured key=value attributes for this object.",
-            "type": "RECORD",
-            "name": "all_tags",
-            "mode": "REPEATED",
-            "fields": [
-                {
-                    "description": "Attribute key.",
-                    "type": "STRING",
-                    "name": "key"
-                },
-                {
-                    "description": "Attribute value.",
-                    "type": "STRING",
-                    "name": "value"
-                }
-            ]
-        },
-        {
-            "description": "GEOGRAPHY-encoded object",
-            "type": "GEOGRAPHY",
-            "name": "geometry"
-        },
-        {
-            "description": "OpenStreetMap feature type. One of: node, way, relation",
-            "type": "STRING",
-            "name": "feature_type"
-        },
-    ]
-}
+BQ_SCHEMA = [] #FIXME define from schema/*.json files
 
 
 class CSVtoDict(beam.DoFn):
