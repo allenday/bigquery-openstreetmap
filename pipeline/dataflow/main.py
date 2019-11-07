@@ -24,7 +24,6 @@ BQ_SCHEMA = {
             "type": "INTEGER",
             "name": "osm_id"
         },
-
         {
             "description": "Object unique ID for multipolygon table, otherwise null.",
             "type": "INTEGER",
@@ -35,7 +34,6 @@ BQ_SCHEMA = {
             "type": "INTEGER",
             "name": "osm_version"
         },
-
         {
             "description": "Last-modified timestamp for this object.",
             "type": "TIMESTAMP",
@@ -63,7 +61,12 @@ BQ_SCHEMA = {
             "description": "GEOGRAPHY-encoded object",
             "type": "GEOGRAPHY",
             "name": "geometry"
-        }
+        },
+        {
+            "description": "OpenStreetMap feature type. One of: node, way, relation",
+            "type": "STRING",
+            "name": "feature_type"
+        },
     ]
 }
 
