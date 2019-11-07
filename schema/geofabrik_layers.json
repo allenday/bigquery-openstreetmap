@@ -60,6 +60,11 @@
    },
    {
       "type":"STRING",
+      "name":"gdal_type",
+      "description":"OpenStreetMap feature type. One of: point, line, multilinestring, multipolygon, other_relation"
+   },
+   {
+      "type":"STRING",
       "name":"layer_partition",
       "description": "Partitioning field for query optimization, see get_partitions(STRING) function"
    }
