@@ -2,22 +2,23 @@
 Beam pipeline that reads OSM GeoJSON file, transforms it and uploads to BigQuery
 """
 
-import re
-import csv
-import sys
-import logging
-import datetime
-
 import apache_beam as beam
-from apache_beam.options.pipeline_options import PipelineOptions
-from apache_beam.metrics import Metrics
+import csv
+import datetime
+import json
+import logging
+import re
+import sys
 
 from apache_beam.io.gcp import bigquery
 from apache_beam.io.gcp.bigquery_file_loads import BigQueryBatchFileLoads
+from apache_beam.metrics import Metrics
+from apache_beam.options.pipeline_options import PipelineOptions
+
 
 CSV_HEADERS = ['geometry', 'osm_id', 'osm_way_id', 'osm_version', 'osm_timestamp', 'all_tags']
 
-BQ_SCHEMA = [] #FIXME define from schema/*.json files
+BQ_SCHEMA = json.loads() #FIXME define from schema/*.json files
 
 
 class CSVtoDict(beam.DoFn):
