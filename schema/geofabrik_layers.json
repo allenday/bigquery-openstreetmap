@@ -1,3 +1,4 @@
+{ "fields":
 [
    {
       "type":"INTEGER",
@@ -63,3 +64,4 @@
       "description": "Partitioning field for query optimization, see get_partitions(STRING) function"
    }
 ]
+}
