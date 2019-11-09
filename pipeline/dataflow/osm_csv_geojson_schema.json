@@ -1,0 +1,49 @@
+{
+    "fields": [
+        {
+            "description": "Object unique ID for all tables except multipolygon. Null for multipolygon.",
+            "type": "INTEGER",
+            "name": "osm_id"
+        },
+
+        {
+            "description": "Object unique ID for multipolygon table, otherwise null.",
+            "type": "INTEGER",
+            "name": "osm_way_id"
+        },
+        {
+            "description": "Version number for this object.",
+            "type": "INTEGER",
+            "name": "osm_version"
+        },
+
+        {
+            "description": "Last-modified timestamp for this object.",
+            "type": "TIMESTAMP",
+            "name": "osm_timestamp"
+        },
+        {
+            "description": "Unstructured key=value attributes for this object.",
+            "type": "RECORD",
+            "name": "all_tags",
+            "mode": "REPEATED",
+            "fields": [
+                {
+                    "description": "Attribute key.",
+                    "type": "STRING",
+                    "name": "key"
+                },
+                {
+                    "description": "Attribute value.",
+                    "type": "STRING",
+                    "name": "value"
+                }
+            ]
+        },
+        {
+            "description": "GEOGRAPHY-encoded object",
+            "type": "GEOGRAPHY",
+            "name": "geometry"
+        }
+    ]
+}

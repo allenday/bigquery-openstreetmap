@@ -5,6 +5,7 @@ Beam pipeline that reads OSM GeoJSON file, transforms it and uploads to BigQuery
 import re
 import csv
 import sys
+import json
 import logging
 import datetime
 
@@ -16,56 +17,6 @@ from apache_beam.io.gcp import bigquery
 from apache_beam.io.gcp.bigquery_file_loads import BigQueryBatchFileLoads
 
 CSV_HEADERS = ['geometry', 'osm_id', 'osm_way_id', 'osm_version', 'osm_timestamp', 'all_tags']
-
-BQ_SCHEMA = {
-    "fields": [
-        {
-            "description": "Object unique ID for all tables except multipolygon. Null for multipolygon.",
-            "type": "INTEGER",
-            "name": "osm_id"
-        },
-
-        {
-            "description": "Object unique ID for multipolygon table, otherwise null.",
-            "type": "INTEGER",
-            "name": "osm_way_id"
-        },
-        {
-            "description": "Version number for this object.",
-            "type": "INTEGER",
-            "name": "osm_version"
-        },
-
-        {
-            "description": "Last-modified timestamp for this object.",
-            "type": "TIMESTAMP",
-            "name": "osm_timestamp"
-        },
-        {
-            "description": "Unstructured key=value attributes for this object.",
-            "type": "RECORD",
-            "name": "all_tags",
-            "mode": "REPEATED",
-            "fields": [
-                {
-                    "description": "Attribute key.",
-                    "type": "STRING",
-                    "name": "key"
-                },
-                {
-                    "description": "Attribute value.",
-                    "type": "STRING",
-                    "name": "value"
-                }
-            ]
-        },
-        {
-            "description": "GEOGRAPHY-encoded object",
-            "type": "GEOGRAPHY",
-            "name": "geometry"
-        }
-    ]
-}
 
 
 class CSVtoDict(beam.DoFn):
@@ -165,6 +116,10 @@ def run(run_local):
         'max_num_workers': 150
     }
 
+    with open('osm_csv_geojson_schema.json') as f:
+        schema_str = f.read()
+    bq_schema = json.loads(schema_str)
+
     options = PipelineOptions(flags=sys.argv, **pipeline_options)
     custom_options = options.view_as(TemplatedOptions)
 
@@ -184,7 +139,7 @@ def run(run_local):
                 custom_options.bq_destination,
                 create_disposition=bigquery.BigQueryDisposition.CREATE_IF_NEEDED,
                 write_disposition=bigquery.BigQueryDisposition.WRITE_TRUNCATE,
-                schema=BQ_SCHEMA,
+                schema=bq_schema,
                 additional_bq_parameters=additional_bq_parameters
             )
     )
