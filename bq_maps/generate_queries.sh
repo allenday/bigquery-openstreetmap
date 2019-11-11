@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# in every subfolder in bsql_maps folder, there is bash file which generates queries for that layer
+# in every subfolder in bq_maps folder, there is bash file which generates queries for that layer
 # script goes through folders and executes those scripts to generate sql files
 
 FOLDERS="$(find . -mindepth 1 -type d)"
