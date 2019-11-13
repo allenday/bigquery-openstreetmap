@@ -29,9 +29,6 @@ LAYER=(
 
 )
 
-#"7202:park"
-#"7211:recreation_ground"
-
 for layer in "${LAYER[@]}"
 do
   CODE="${layer%%:*}"
@@ -44,16 +41,19 @@ FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
+#7201
 echo "SELECT
   7201 AS layer_code, 'landuse' AS layer_class, 'forest' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'landuse' AND tags.value='forest') OR (tags.key = 'natural' AND tags.value='wood'))" > "forest.sql"
 
+#7202
 echo "SELECT
   7202 AS layer_code, 'landuse' AS layer_class, 'park' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'leisure' AND tags.value='park') OR (tags.key = 'leisure' AND tags.value='common'))" > "park.sql"
 
+#7211
 echo "SELECT
   7211 AS layer_code, 'landuse' AS layer_class, 'recreation_ground' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
