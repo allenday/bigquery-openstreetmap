@@ -71,4 +71,4 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' A
 echo "SELECT
   2733 AS layer_code, 'poi_tourism' AS layer_class, 'archaeological' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='archaeological_site')" > "archaeological.sql"
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'historic' AND tags.value='archaeological_site')" > "archaeological.sql"
