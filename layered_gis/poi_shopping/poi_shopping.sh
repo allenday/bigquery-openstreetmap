@@ -58,11 +58,11 @@ FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='alcohol') OR (tags.key = 'shop' AND tags.value='beverages'))" > "shop_beverages.sql"
 
 #2543
+#TODO request upstream mod, currently shows "shop=doityourself and shop=hardware" but following usual doc conventions should instead be "shop=doityourself, shop=hardware"
 echo "SELECT
   2543 AS layer_code, 'poi_shopping' AS layer_class, 'doityourself' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='doityourself')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='hardware')" > "shop_doityourself.sql"
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value IN ('doityourself','hardware')))" > "shop_doityourself.sql"
 
 #2568
 echo "SELECT
