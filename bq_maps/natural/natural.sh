@@ -1,36 +1,27 @@
 #!/bin/sh
 
-echo "SELECT
-    'natural-beach' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.multipolygons\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='beach')" > "natural-beach.sql"
+LAYER=( 
+        "4101:natural=spring"
+        "4102:natural=glacier"
+        "4111:natural=peak"
+        "4112:natural=cliff"
+        "4113:natural=volcano"
+        "4121:natural=tree"
+        "4131:natural=mine"
+        "4132:natural=cave_entrance"
+        "4141:natural=beach"
+)
 
-echo "SELECT
-    'natural-coastline' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.lines\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='coastline')" > "natural-coastline.sql"
 
-echo "SELECT
-    'natural-geyser' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.points\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='geyser')" > "natural-geyser.sql"
 
-echo "SELECT
-    'natural-grassland' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.multipolygons\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='grassland')" > "natural-grassland.sql"
-
-echo "SELECT
-    'natural-scrub' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.multipolygons\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='scrub')" > "natural-scrub.sql"
-
-echo "SELECT
-    'natural-volcano' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.points\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='volcano')" > "natural-volcano.sql"
-
-echo "SELECT
-    'natural-wood' AS name, *
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.multipolygons\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='wood')" > "natural-wood.sql"
+for layer in "${LAYER[@]}"
+do
+  CODE="${layer%%:*}"
+  KV="${layer##*:}"
+  K="${KV%%=*}"
+  V="${KV##*=}"
+  echo "SELECT
+  $CODE AS layer_code, 'natural' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
+done
