@@ -11,13 +11,6 @@ LAYER=(
         "5209:highway=street_lamp"
         "5250:amenity=fuel"
         "5270:amenity=bicycle_parking"
-        "5301:leisure=slipway"
-        "5302:leisure=marina"
-        "5303:man_made=pier"
-        "5311:waterway=dam"
-        "5321:waterway=waterfall"
-        "5331:waterway=lock_gate"
-        "5332:waterway=weir"
 )
 
 
