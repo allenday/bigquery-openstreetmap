@@ -1,7 +1,7 @@
 #!/bin/sh
 
 LAYER=( 
-        "2902:bench=bench"
+        "2902:amenity=bench"
         "2903:amenity=drinking_water"
         "2904:amenity=fountain"
         "2905:amenity=hunting_stand"
