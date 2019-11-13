@@ -32,10 +32,10 @@ LAYER=(
         "2547:shop=garden_centre"
         "2561:shop=hairdresser"
         "2562:shop=car_repair"
-        "2563:shop=car_rental"
-        "2564:shop=car_wash"
-        "2565:shop=car_sharing"
-        "2566:shop=bicycle_rental"
+        "2563:amenity=car_rental"
+        "2564:amenity=car_wash"
+        "2565:amenity=car_sharing"
+        "2566:amenity=bicycle_rental"
         "2567:shop=travel_agency"
 )
 
