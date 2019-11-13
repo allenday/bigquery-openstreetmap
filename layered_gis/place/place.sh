@@ -46,7 +46,7 @@ WHERE (
    )" > "national_capital.sql"
 
 echo "SELECT
-  1099 AS layer_code, 'place AS layer_class, 'named_place' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  1099 AS layer_code, 'place' AS layer_class, 'named_place' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE
 EXISTS(SELECT 1 FROM UNNEST(all_tags) AS tags WHERE tags.key = 'area' AND tags.value='yes')
