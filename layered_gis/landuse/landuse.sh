@@ -3,7 +3,7 @@
 LAYER=( 
         "7203:landuse=residential"
         "7204:landuse=industrial"
-        "7206:landuse=cemetary"
+        "7206:landuse=cemetery"
         "7207:landuse=allotments"
         "7208:landuse=meadow"
         "7209:landuse=commercial"
