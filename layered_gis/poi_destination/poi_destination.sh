@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#TODO we are using "destination" singular instead of "destinations" plural in PDF for consistency with other layers. presumably a typo upstream. open issue to confirm with Geofabrik
+#see https://github.com/allenday/bigquery-openstreetmap/issues/62
 LAYER=(
         "2721:tourism=attraction"
         "2722:tourism=museum"
@@ -28,7 +30,7 @@ do
   V="${KV##*=}"
 
   echo "SELECT
-  $CODE AS layer_code, 'poi_destinations' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  $CODE AS layer_code, 'poi_destination' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
