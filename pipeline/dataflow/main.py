@@ -20,7 +20,6 @@ CSV_HEADERS = ['geometry', 'osm_id', 'osm_way_id', 'osm_version', 'osm_timestamp
 
 BQ_SCHEMA = json.loads() #FIXME define from schema/*.json files
 
-
 class CSVtoDict(beam.DoFn):
     """Converts line from input file into dictionary"""
 
@@ -118,6 +117,10 @@ def run(run_local):
         'max_num_workers': 150
     }
 
+    with open('osm_csv_geojson_schema.json') as f:
+        schema_str = f.read()
+    bq_schema = json.loads(schema_str)
+
     options = PipelineOptions(flags=sys.argv, **pipeline_options)
     custom_options = options.view_as(TemplatedOptions)
 
@@ -137,7 +140,7 @@ def run(run_local):
                 custom_options.bq_destination,
                 create_disposition=bigquery.BigQueryDisposition.CREATE_IF_NEEDED,
                 write_disposition=bigquery.BigQueryDisposition.WRITE_TRUNCATE,
-                schema=BQ_SCHEMA,
+                schema=bq_schema,
                 additional_bq_parameters=additional_bq_parameters
             )
     )
