@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#TODO relgion=shintoist matches nothing, but relgion=shinto matches 24K+. report upstream
-
 LAYER=( 
         "3100:religion=christian"
         "3200:religion=jewish"

@@ -9,6 +9,7 @@ LAYER=(
         "4121:natural=tree"
         "4132:natural=cave_entrance"
         "4141:natural=beach"
+        "8300:natural=coastline"
 )
 
 
@@ -25,8 +26,7 @@ FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
-#4131
-#TODO natural=1, historic=6573, man_made=5624, land_use=1051, survey_point=765, industrial=617. request upstream to confirm it's correct or to alter the upstream query
+#4131 
   echo "SELECT
   4131 AS layer_code, 'natural' AS layer_class, 'mine' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`

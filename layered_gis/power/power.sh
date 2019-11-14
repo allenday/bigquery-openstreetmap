@@ -10,13 +10,13 @@ echo "SELECT
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='generator')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE
-       (  tags.key = 'generator:source' AND tags.value = 'nuclear' ) --6411
-    OR ( (tags.key = 'generator:source' AND tags.value = 'solar') OR (tags.key = 'power_source' AND tags.value = 'photovoltaic') ) --6412
-    OR (  tags.key = 'generator:source' AND tags.value IN ('gas','coal')  ) -- 6413
-    OR ( (tags.key = 'generator:source' AND tags.value = 'hydro') OR (tags.key = 'power_source' AND tags.value = 'hydro') ) --6414
-    OR ( (tags.key = 'generator:source' AND tags.value = 'wind') OR (tags.key = 'power_source' AND tags.value = 'wind') ) --6415
-    OR ( (tags.key = 'power' AND tags.value = 'station') OR (tags.key = 'power' AND tags.value = 'sub_station') ) --6422
-    OR (  tags.key = 'power' AND tags.value = 'transformer' ) --6423
+       (  tags.key = 'generator:source' AND tags.value = 'nuclear' ) 
+    OR ( (tags.key = 'generator:source' AND tags.value = 'solar') OR (tags.key = 'power_source' AND tags.value = 'photovoltaic') ) 
+    OR (  tags.key = 'generator:source' AND tags.value IN ('gas','coal')  ) 
+    OR ( (tags.key = 'generator:source' AND tags.value = 'hydro') OR (tags.key = 'power_source' AND tags.value = 'hydro') ) 
+    OR ( (tags.key = 'generator:source' AND tags.value = 'wind') OR (tags.key = 'power_source' AND tags.value = 'wind') ) 
+    OR ( (tags.key = 'power' AND tags.value = 'station') OR (tags.key = 'power' AND tags.value = 'sub_station') ) 
+    OR (  tags.key = 'power' AND tags.value = 'transformer' ) 
   )" > "station.sql"
 
 echo "SELECT

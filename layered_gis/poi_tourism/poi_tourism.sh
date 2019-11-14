@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#TODO report bug on 2734, geofabrik documents it as wayside_criss which matches zero records
-#TODO report bug on 2704, geofabrik documents it as tourism_information which should be tourism=information
 LAYER=( 
         "2721:tourism=attraction"
         "2722:tourism=museum"
