@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#TODO we are using "destination" singular instead of "destinations" plural in PDF for consistency with other layers. presumably a typo upstream. open issue to confirm with Geofabrik
-#see https://github.com/allenday/bigquery-openstreetmap/issues/62
 LAYER=(
         "2721:tourism=attraction"
         "2722:tourism=museum"
@@ -11,7 +9,7 @@ LAYER=(
         "2731:historic=castle"
         "2732:historic=ruins"
         "2733:historic=archaeological_site"
-        "2734:historic=wayside_criss"
+        "2734:historic=wayside_cross"
         "2735:historic=wayside_shrine"
         "2736:historic=battlefield"
         "2737:historic=fort"
