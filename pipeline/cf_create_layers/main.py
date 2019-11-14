@@ -38,7 +38,7 @@ def delete_temp_dataset():
 
 
 def get_queries() -> List[str]:
-    """gets SQL query files from Cloud Storage bucket. It expects them to be in "folder" bsql_maps
+    """gets SQL query files from Cloud Storage bucket. It expects them to be in "folder" layered_gis
 
     :returns list of SQL queries
     """
@@ -46,13 +46,13 @@ def get_queries() -> List[str]:
     logging.info("getting query files")
     gcs = storage.Client(project=GCP_PROJECT)
     bucket = gcs.bucket(BUCKET)
-    blobs = bucket.list_blobs(prefix='bsql_maps')
+    blobs = bucket.list_blobs(prefix='layered_gis')
     queries = {}
     for blob in blobs:
         blob_name = blob.name
         if '.sh' in blob_name:
             continue
-        filename = blob_name.replace('bsql_maps/', '')
+        filename = blob_name.replace('layered_gis/', '')
         layer, _ = filename.split('/')
         sql_query = blob.download_as_string().decode('utf-8')
         full_query = queries.get(layer, '')
