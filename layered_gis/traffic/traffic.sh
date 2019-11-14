@@ -43,7 +43,7 @@ echo "SELECT
   5260 AS layer_code, 'traffic' AS layer_class, 'parking' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
-  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='site')
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='surface')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='multi-storey')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='underground')" > "parking.sql"
 #5261
@@ -51,7 +51,7 @@ echo "SELECT
   5261 AS layer_code, 'traffic' AS layer_class, 'parking_site' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='site')" > "parking_site.sql"
+  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='surface')" > "parking_site.sql"
 #5262
 echo "SELECT
   5262 AS layer_code, 'traffic' AS layer_class, 'parking_multistorey' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
