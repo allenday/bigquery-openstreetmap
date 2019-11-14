@@ -9,6 +9,7 @@ LAYER=(
         "4121:natural=tree"
         "4132:natural=cave_entrance"
         "4141:natural=beach"
+        "8300:natural=coastline"
 )
 
 
