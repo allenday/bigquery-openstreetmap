@@ -20,7 +20,7 @@ find . -name '*.csv' -exec gsutil -m cp {} $GCS_GEOJSON_BUCKET \;
 sleep 120s
 
 # publish pubsub message so we can check when datflow jobs are done
-gcloud pubsub topics publish $DF_JOBS_PS_TOPIC --message " "
+gcloud pubsub topics publish $PS_TOPIC_DF_JOBS --message " "
 
 # shutdown
 gcloud compute instances delete $(hostname) --zone \

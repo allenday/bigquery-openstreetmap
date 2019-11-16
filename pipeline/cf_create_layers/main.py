@@ -11,12 +11,13 @@ from google.cloud import bigquery
 from google.cloud import storage
 from google.api_core.exceptions import NotFound
 
+from copy_public_tables import copy_tables_to_public_dataset
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
-BUCKET = os.environ['BUCKET']
-TABLE_NAME = os.environ['TABLE_NAME']
-DATASET_NAME = os.environ['DATASET_NAME']
-TEMP_DATASET_NAME = os.environ['TEMP_DATASET_NAME']
+BUCKET = os.environ['GCS_BUCKET'].replace('gs://', '')
+TABLE_NAME = os.environ['BQ_LAYERS_TABLE']
+DATASET_NAME = os.environ['BQ_DATASET']
+TEMP_DATASET_NAME = os.environ['BQ_TEMP_DATASET']
 
 bq = bigquery.Client(project=GCP_PROJECT)
 
@@ -24,19 +25,20 @@ temp_dataset_ref = bigquery.DatasetReference(GCP_PROJECT, TEMP_DATASET_NAME)
 temp_table_ref = bigquery.TableReference(temp_dataset_ref, TABLE_NAME)
 
 
-def delete_temp_table():
-    """Deletes temporary BigQuery table"""
+def create_temp_dataset():
+    """Creates temporary dataset"""
 
-    try:
-        bq.get_table(temp_table_ref)
-        bq.delete_table(temp_table_ref)
-        logging.info("deleted temp table")
-    except NotFound:
-        pass
+    bq.create_dataset(temp_dataset_ref, exists_ok=True)
+
+
+def delete_temp_dataset():
+    """Deletes temporary BigQuery dataset and table"""
+
+    bq.delete_dataset(temp_dataset_ref, delete_contents=True, not_found_ok=True)
 
 
 def get_queries() -> List[str]:
-    """gets SQL query files from Cloud Storage bucket. It expects them to be in "folder" bsql_maps
+    """gets SQL query files from Cloud Storage bucket. It expects them to be in "folder" layered_gis
 
     :returns list of SQL queries
     """
@@ -44,13 +46,13 @@ def get_queries() -> List[str]:
     logging.info("getting query files")
     gcs = storage.Client(project=GCP_PROJECT)
     bucket = gcs.bucket(BUCKET)
-    blobs = bucket.list_blobs(prefix='bsql_maps')
+    blobs = bucket.list_blobs(prefix='layered_gis')
     queries = {}
     for blob in blobs:
         blob_name = blob.name
         if '.sh' in blob_name:
             continue
-        filename = blob_name.replace('bsql_maps/', '')
+        filename = blob_name.replace('layered_gis/', '')
         layer, _ = filename.split('/')
         sql_query = blob.download_as_string().decode('utf-8')
         full_query = queries.get(layer, '')
@@ -86,6 +88,22 @@ def copy_table():
     bq.copy_table(temp_table_ref, table_ref, job_config=copyjob_config)
 
 
+def create_layer_partitioned_table():
+    """Creates layer partitioned table"""
+
+    table_name = f"{TABLE_NAME}_partitioned"
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
+    PARTITION BY partnum
+    AS
+    SELECT
+    *,
+    `{GCP_PROJECT}.{DATASET_NAME}`.layername2partition(name) as partnum
+    FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
+
+    job_config = bigquery.QueryJobConfig()
+    query_job = bq.query(sql_query, job_config=job_config)
+
+
 def wait_jobs_completed():
     """Checks if all BigQuery jobs are completed so it can copy temp table"""
 
@@ -101,14 +119,43 @@ def wait_jobs_completed():
         time.sleep(30)
 
 
+def create_features_table():
+    """creates 'features' table which is union of all 5 tables"""
+
+    table_name = 'features'
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
+    AS
+    SELECT osm_id, osm_way_id, 'line' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.lines`
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'multilinestring' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multilinestrings`
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'multipolygon' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multipolygons`
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'other_relation' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.other_relations` 
+    UNION ALL
+    SELECT osm_id, osm_way_id, 'point' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
+    """
+    query_job = bq.query(sql_query)
+
+
 def process():
     """Complete flow"""
-    delete_temp_table()
+
+    create_temp_dataset()
     queries = get_queries()
     create_query_jobs(queries)
     wait_jobs_completed()
     copy_table()
+    create_layer_partitioned_table()
+    create_features_table()
+    delete_temp_dataset()
+    copy_tables_to_public_dataset()
 
 
 def main(data, context):
     process()
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    # process()

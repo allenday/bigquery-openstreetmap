@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-gcloud --project openstreetmap-public-data-dev functions deploy init-df \
+gcloud functions deploy init-df \
+--project $GCP_PROJECT \
 --entry-point main \
 --runtime python37 \
---trigger-resource openstreetmap-public-data-dev-geojson	\
+--trigger-resource $GCS_GEOJSON_BUCKET	\
 --trigger-event google.storage.object.finalize \
---env-vars-file env.yaml
+--set-env-vars=DF_TEMPLATE=$DATAFLOW_TEMPLATE_LOCATION,DF_WORKING_BUCKET=$GCS_BUCKET,BQ_DATASET=$BQ_DATASET

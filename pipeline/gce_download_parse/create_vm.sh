@@ -1,10 +1,10 @@
 #!/bin/bash
 
 NAME=inst1
-SCRIPT_URL=gs://openstreetmap-public-data-dev/startup.sh
+SCRIPT_URL=gs://openstreetmap-public-data-prod/startup.sh
 
 gcloud compute instances create $NAME \
---project openstreetmap-public-data-dev \
+--project $GCP_PROJECT \
 --machine-type n1-standard-32 \
 --boot-disk-size 1TB \
 --boot-disk-type pd-ssd \
