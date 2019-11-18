@@ -61,7 +61,7 @@
    {
       "type":"STRING",
       "name":"layer_partition",
-      "description": "Partitioning field for query optimization, see get_partitions(STRING) function"
+      "description": "Partitioning field for query optimization, see layer_partition(STRING) function"
    }
 ]
 }
