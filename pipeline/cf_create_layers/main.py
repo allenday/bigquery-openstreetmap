@@ -91,13 +91,13 @@ def copy_table():
 def create_layer_partitioned_table():
     """Creates layer partitioned table"""
 
-    table_name = f"{TABLE_NAME}_partitioned"
+    table_name = f"{TABLE_NAME}"
     sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
-    PARTITION BY partnum
+    PARTITION BY layer_partition
     AS
     SELECT
     *,
-    `{GCP_PROJECT}.{DATASET_NAME}`.layername2partition(name) as partnum
+    `{GCP_PROJECT}.{DATASET_NAME}`.layer_partition(name) as layer_partition
     FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
 
     job_config = bigquery.QueryJobConfig()
