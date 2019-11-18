@@ -122,7 +122,7 @@ def wait_jobs_completed():
 def create_features_table():
     """creates 'features' table which is union of all 5 tables"""
 
-    table_name = 'osm_features'
+    table_name = 'features'
     sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
     AS
     SELECT osm_id, osm_way_id, 'point' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
