@@ -122,9 +122,11 @@ def wait_jobs_completed():
 def create_features_table():
     """creates 'features' table which is union of all 5 tables"""
 
-    table_name = 'features'
+    table_name = 'osm_features'
     sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
     AS
+    SELECT osm_id, osm_way_id, 'point' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
+    UNION ALL
     SELECT osm_id, osm_way_id, 'line' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.lines`
     UNION ALL
     SELECT osm_id, osm_way_id, 'multilinestring' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multilinestrings`
@@ -132,8 +134,6 @@ def create_features_table():
     SELECT osm_id, osm_way_id, 'multipolygon' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multipolygons`
     UNION ALL
     SELECT osm_id, osm_way_id, 'other_relation' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.other_relations` 
-    UNION ALL
-    SELECT osm_id, osm_way_id, 'point' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
     """
     query_job = bq.query(sql_query)
 
