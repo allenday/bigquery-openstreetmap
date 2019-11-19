@@ -35,26 +35,26 @@ do
   KV="${layer##*:}"
   K="${KV%%=*}"
   V="${KV##*=}"
-  echo "SELECT
-  $CODE AS layer_code, 'land_use' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
+  echo "SELECT 
+  COALESCE(osm_id,osm_way_id) AS osm_id, osm_version, osm_timestamp, all_tags, geometry, 'land_use-$V' AS layer, $CODE AS layer_code, 'land_use' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, \`${GCP_PROJECT}.${BQ_DATASET}.layer_partition\`('land_use-$V') AS layer_partition
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
 #7201
 echo "SELECT
-  7201 AS layer_code, 'land_use' AS layer_class, 'forest' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
+COALESCE(osm_id,osm_way_id) AS osm_id, osm_version, osm_timestamp, all_tags, geometry, 'land_use-forest' AS layer, 7201 AS layer_code, 'land_use' AS layer_class, 'forest' AS layer_name, feature_type AS gdal_type, \`${GCP_PROJECT}.${BQ_DATASET}.layer_partition\`('land_use-forest') AS layer_partition
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'landuse' AND tags.value='forest') OR (tags.key = 'natural' AND tags.value='wood'))" > "forest.sql"
 
 #7202
 echo "SELECT
-  7202 AS layer_code, 'land_use' AS layer_class, 'park' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
+COALESCE(osm_id,osm_way_id) AS osm_id, osm_version, osm_timestamp, all_tags, geometry, 'land_use-park' AS layer, 7202 AS layer_code, 'land_use' AS layer_class, 'park' AS layer_name, feature_type AS gdal_type, \`${GCP_PROJECT}.${BQ_DATASET}.layer_partition\`('land_use-park') AS layer_partition
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'leisure' AND tags.value='park') OR (tags.key = 'leisure' AND tags.value='common'))" > "park.sql"
 
 #7211
 echo "SELECT
-  7211 AS layer_code, 'land_use' AS layer_class, 'recreation_ground' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
+COALESCE(osm_id,osm_way_id) AS osm_id, osm_version, osm_timestamp, all_tags, geometry, 'land_use-recreation_ground' AS layer, 7211 AS layer_code, 'land_use' AS layer_class, 'recreation_ground' AS layer_name, feature_type AS gdal_type, \`${GCP_PROJECT}.${BQ_DATASET}.layer_partition\`('land_use-recreation_ground') AS layer_partition
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'leisure' AND tags.value='recreation_ground') OR (tags.key = 'landuse' AND tags.value='recreation_ground'))" > "recreation_ground.sql"
