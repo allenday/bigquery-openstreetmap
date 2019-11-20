@@ -125,15 +125,15 @@ def create_features_table():
     table_name = 'features'
     sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
     AS
-    SELECT osm_id, osm_way_id, 'line' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.lines`
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, 'line' AS feature_type,            osm_version, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.lines`
     UNION ALL
-    SELECT osm_id, osm_way_id, 'multilinestring' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multilinestrings`
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, 'multilinestring' AS feature_type, osm_version, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multilinestrings`
     UNION ALL
-    SELECT osm_id, osm_way_id, 'multipolygon' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multipolygons`
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, 'multipolygon' AS feature_type,    osm_version, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multipolygons`
     UNION ALL
-    SELECT osm_id, osm_way_id, 'other_relation' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.other_relations` 
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, 'other_relation' AS feature_type,  osm_version, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.other_relations` 
     UNION ALL
-    SELECT osm_id, osm_way_id, 'point' AS feature_type, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, 'point' AS feature_type,           osm_version, osm_timestamp, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
     """
     query_job = bq.query(sql_query)
 
