@@ -35,7 +35,7 @@ def create_vm():
     credentials, _project = google.auth.default()
     service = build('compute', 'v1', credentials=credentials, cache_discovery=False)
     body = {
-        'name': 'osmprocess',
+        'name': 'osmprocess-test',
         'machineType': f'zones/{GCE_ZONE}/machineTypes/n1-standard-16',
         'disks': [
             {
