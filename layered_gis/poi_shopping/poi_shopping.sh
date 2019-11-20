@@ -47,33 +47,33 @@ do
   V="${KV##*=}"
   echo "SELECT
   $CODE AS layer_code, 'poi_shopping' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
 #2518
 echo "SELECT
   2518 AS layer_code, 'poi_shopping' AS layer_class, 'beverages' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='alcohol') OR (tags.key = 'shop' AND tags.value='beverages'))" > "shop_beverages.sql"
 
 #2543
 #TODO request upstream mod, currently shows "shop=doityourself and shop=hardware" but following usual doc conventions should instead be "shop=doityourself, shop=hardware"
 echo "SELECT
   2543 AS layer_code, 'poi_shopping' AS layer_class, 'doityourself' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value IN ('doityourself','hardware')))" > "shop_doityourself.sql"
 
 #2568
 echo "SELECT
   2568 AS layer_code, 'poi_shopping' AS layer_class, 'laundry' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='laundry') OR (tags.key = 'shop' AND tags.value='dry_cleaning'))" > "shop_laundry.sql"
 
 #2590
 echo "SELECT
   2590 AS layer_code, 'poi_shopping' AS layer_class, 'vending_cigarette' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='vending_machine')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='cigarettes')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='parking_tickets')" > "vending_machine.sql"
@@ -81,11 +81,11 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' A
 #2591
 echo "SELECT
   2591 AS layer_code, 'poi_shopping' AS layer_class, 'vending_cigarette' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='cigarettes')" > "vending_cigarette.sql"
 
 #2592
 echo "SELECT
   2592 AS layer_code, 'poi_shopping' AS layer_class, 'vending_parking' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='parking_tickets')" > "vending_parking.sql"

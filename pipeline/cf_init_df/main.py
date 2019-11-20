@@ -12,8 +12,7 @@ import google.auth
 GCP_PROJECT = os.environ['GCP_PROJECT']
 DF_TEMPLATE = os.environ['DF_TEMPLATE']
 DF_WORKING_BUCKET = os.environ['DF_WORKING_BUCKET']
-BQ_DATASET = os.environ['BQ_DATASET']
-
+BQ_TARGET_DATASET = os.environ['BQ_TARGET_DATASET']
 
 def init_df(bucket: str, input_filename: str):
     """Launching Dataflow job based on template
@@ -26,7 +25,7 @@ def init_df(bucket: str, input_filename: str):
 
     bq_table = input_filename.split('.')[0].split('-')[-1]
     job_name = '{}_processing_{}'.format(bq_table, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
-    bq_path = f"{GCP_PROJECT}:{BQ_DATASET}.{bq_table}"
+    bq_path = f"{GCP_PROJECT}:{BQ_TARGET_DATASET}.{bq_table}"
 
     body = {
         "jobName": f"{job_name}",
