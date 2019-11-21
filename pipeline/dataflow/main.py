@@ -18,7 +18,6 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 CSV_HEADERS = ['geometry', 'osm_id', 'osm_way_id', 'osm_version', 'osm_timestamp', 'all_tags']
 
-BQ_SCHEMA = json.loads() #FIXME define from schema/*.json files
 
 class CSVtoDict(beam.DoFn):
     """Converts line from input file into dictionary"""
