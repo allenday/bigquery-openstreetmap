@@ -1,38 +1,64 @@
 #!/bin/bash
 
-# Project IDs
-export GCP_PROJECT=openstreetmap-public-data-prod
-export BQ_TARGET_PROJECT=bigquery-public-data
+export BASE=openstreetmap-public-data
+export STAGE=dev
+#export STAGE=prod
 
-# OSM
-export OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+# Project IDs
+export GCP_PROJECT=$BASE-$STAGE
+export BQ_TARGET_PROJECT=$BASE-$STAGE
+
+# Source OSM data settings
+export DEV_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
+export PROD_OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+
+# BQ settings
+export DEV_BQ_TARGET_PROJECT=$BASE-$STAGE
+export PROD_BQ_TARGET_PROJECT=bigquery-public-data
+
+export DEV_BQ_SOURCE_DATASET=osm_planet
+export DEV_BQ_LAYERS_TABLE=layers
+export DEV_BQ_TEMP_DATASET=osm_temp-$STAGE
+export DEV_BQ_TARGET_DATASET=geo_openstreetmap-$STAGE
+
+export PROD_BQ_SOURCE_DATASET=osm_planet
+export PROD_BQ_LAYERS_TABLE=layers
+export PROD_BQ_TEMP_DATASET=osm_temp-$STAGE
+export PROD_BQ_TARGET_DATASET=geo_openstreetmap
+
+#GCE settings
+export DEV_GCE_SERVICE_ACCOUNT_EMAIL=164168395917-compute@developer.gserviceaccount.com
+export PROD_GCE_SERVICE_ACCOUNT_EMAIL=65356283268-compute@developer.gserviceaccount.com
+
+###
+### use STAGE to normalize variables for uniform referencing
+###
+
+export BQ_SERVICE_ACCOUNT_FILENAME=${STAGE}_bq_osm_service_account.json
+TTT=$(echo "${STAGE}_BQ_TARGET_PROJECT"         | tr '[:lower:]' '[:upper:]'); export BQ_TARGET_PROJECT=${!TTT}
+TTT=$(echo "${STAGE}_GCE_SERVICE_ACCOUNT_EMAIL" | tr '[:lower:]' '[:upper:]'); export GCE_SERVICE_ACCOUNT_EMAIL=${!TTT}
+TTT=$(echo "${STAGE}_OSM_URL"                   | tr '[:lower:]' '[:upper:]'); export OSM_URL=${!TTT}
 
 # GCS
-export GCS_BUCKET=gs://openstreetmap-public-data-prod
-export GCS_GEOJSON_BUCKET=gs://openstreetmap-public-data-geojson-prod
+export GCS_BUCKET=gs://$BASE-$STAGE
+export GCS_GEOJSON_BUCKET=$GCS_BUCKET-geojson
 
 # GCE
-export GCE_INSTANCE_NAME=inst1
-export SCRIPT_URL=$GCS_BUCKET/startup.sh
+export GCE_INSTANCE_NAME=inst1-${STAGE}
+export GCE_SCRIPT_URL=$GCS_BUCKET/startup.sh
 export GCE_ZONE=us-central1-a
-export GCE_SERVICE_ACCOUNT_EMAIL=65356283268-compute@developer.gserviceaccount.com
 
-
-# DATAFLOW
-export DATAFLOW_TEMP_LOCATION=$GCS_BUCKET/df_temp
-export DATAFLOW_STAGING_LOCATION=$GCS_BUCKET/df_staging
-export DATAFLOW_TEMPLATE_LOCATION=$GCS_BUCKET/df_template/process_geojson
+# DF
+export DF_TEMP_LOCATION=$GCS_BUCKET/df_temp
+export DF_STAGING_LOCATION=$GCS_BUCKET/df_staging
+export DF_TEMPLATE_LOCATION=$GCS_BUCKET/df_template/process_geojson
 
 # BigQuery
-export BQ_SOURCE_DATASET=osm_planet
-export BQ_LAYERS_TABLE=layers
-export BQ_TEMP_DATASET=osm_temp
-export BQ_TARGET_DATASET=geo_openstreetmap
+TTT=$(echo "${STAGE}_BQ_SOURCE_DATASET" | tr '[:lower:]' '[:upper:]'); export BQ_SOURCE_DATASET=${!TTT}
+TTT=$(echo "${STAGE}_BQ_LAYERS_TABLE"   | tr '[:lower:]' '[:upper:]'); export BQ_LAYERS_TABLE=${!TTT}
+TTT=$(echo "${STAGE}_BQ_TEMP_DATASET"   | tr '[:lower:]' '[:upper:]'); export BQ_TEMP_DATASET=${!TTT}
+TTT=$(echo "${STAGE}_BQ_TARGET_DATASET" | tr '[:lower:]' '[:upper:]'); export BQ_TARGET_DATASET=${!TTT}
 
 # PubSub topics
-export DF_JOBS_PS_TOPIC=check-df-jobs
-export PS_TOPIC_DF_JOBS=check-df-jobs
-export PS_LAYERS_TOPIC=create-layers
-
-# BQ target dataset (bigquery-public-data.geo_openstreetmap)
-export SERVICE_ACCOUNT_FILENAME=bq_osm_service_account.json
+export PS_TOPIC_DF_JOBS=check-df-jobs-$STAGE
+export PS_TOPIC_LAYERS=create-layers-$STAGE
