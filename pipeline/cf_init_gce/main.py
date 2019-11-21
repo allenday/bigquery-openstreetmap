@@ -10,9 +10,8 @@ import google.auth
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
 GCE_ZONE = os.environ['GCE_ZONE']
-SCRIPT_URL = os.environ['SCRIPT_URL']
-SERVICE_ACCOUNT_EMAIL = os.environ['SERVICE_ACCOUNT_EMAIL']
-
+GCE_SCRIPT_URL = os.environ['GCE_SCRIPT_URL']
+GCE_SERVICE_ACCOUNT_EMAIL = os.environ['GCE_SERVICE_ACCOUNT_EMAIL']
 
 def get_info(instance_name: str):
     """Gets info about GCE instance, for dev/debugging purposes
@@ -57,7 +56,7 @@ def create_vm():
         'metadata': {'items': [
             {
                 'key': 'startup-script-url',
-                'value': SCRIPT_URL,
+                'value': GCE_SCRIPT_URL,
             }
         ]},
         'serviceAccounts': [{
