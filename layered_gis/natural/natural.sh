@@ -32,6 +32,6 @@ done
 FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'natural' AND tags.value='mine')
    OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'historic' AND tags.value='mine')
-   OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'landuse' AND tags.value='mine')
+   OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'landuse' AND tags.value='quarry')
    OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'survey_point' AND tags.value='mine')
    OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'industrial' AND tags.value='mine')" > "mine.sql"
