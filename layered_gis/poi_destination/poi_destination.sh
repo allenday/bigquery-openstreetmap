@@ -8,7 +8,6 @@ LAYER=(
         "2725:tourism=artwork"
         "2731:historic=castle"
         "2732:historic=ruins"
-        "2733:historic=archaeological_site"
         "2734:historic=wayside_cross"
         "2735:historic=wayside_shrine"
         "2736:historic=battlefield"
@@ -33,3 +32,8 @@ FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
+#2733
+echo "SELECT
+  2733 AS layer_code, 'poi_destination' AS layer_class, 'archaeological' AS layer_name, feature_type AS gdal_type, osm_id, osm_version, osm_timestamp, all_tags, geometry
+FROM \`${GCP_PROJECT}.${BQ_DATASET}.features\`
+WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'historic' AND tags.value='archaeological_site')" > "archaeological_site.sql"
