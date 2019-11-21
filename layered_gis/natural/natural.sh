@@ -2,7 +2,7 @@
 
 LAYER=( 
         "4101:natural=spring"
-        "4102:natural=glacier"
+        "4103:natural=glacier"
         "4111:natural=peak"
         "4112:natural=cliff"
         "4113:natural=volcano"
