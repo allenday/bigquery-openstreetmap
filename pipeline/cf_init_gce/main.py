@@ -8,6 +8,7 @@ import logging
 from googleapiclient.discovery import build
 import google.auth
 
+STAGE=os.environ['STAGE']
 GCP_PROJECT = os.environ['GCP_PROJECT']
 GCE_ZONE = os.environ['GCE_ZONE']
 GCE_SCRIPT_URL = os.environ['GCE_SCRIPT_URL']
@@ -34,7 +35,7 @@ def create_vm():
     credentials, _project = google.auth.default()
     service = build('compute', 'v1', credentials=credentials, cache_discovery=False)
     body = {
-        'name': 'osmprocess-test',
+        'name': 'osmprocess-'+STAGE,
         'machineType': f'zones/{GCE_ZONE}/machineTypes/n1-standard-16',
         'disks': [
             {
