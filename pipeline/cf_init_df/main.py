@@ -12,7 +12,7 @@ import google.auth
 STAGE=os.environ['STAGE']
 GCP_PROJECT = os.environ['GCP_PROJECT']
 DF_TEMPLATE = os.environ['DF_TEMPLATE']
-DF_WORKING_BUCKET = os.environ['DF_WORKING_BUCKET']
+GCS_BUCKET = os.environ['GCS_BUCKET']
 BQ_TARGET_DATASET = os.environ['BQ_TARGET_DATASET']
 
 def init_df(bucket: str, input_filename: str):
@@ -36,7 +36,7 @@ def init_df(bucket: str, input_filename: str):
 
         },
         "environment": {
-            "tempLocation": f"{DF_WORKING_BUCKET}/df_temp-{STAGE}",
+            "tempLocation": f"{GCS_BUCKET}/df_temp-{STAGE}",
         },
 
     }
