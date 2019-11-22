@@ -8,4 +8,4 @@ gcloud functions deploy init-df-$STAGE \
 --trigger-resource $GCS_GEOJSON_BUCKET	\
 --trigger-event google.storage.object.finalize \
 --source=$SOURCE_ROOT/pipeline/cf_init_df \
---set-env-vars=DF_TEMPLATE=$DF_TEMPLATE_LOCATION,DF_WORKING_BUCKET=$GCS_BUCKET,BQ_TARGET_DATASET=$BQ_TARGET_DATASET
+--set-env-vars=STAGE=$STAGE,DF_TEMPLATE=$DF_TEMPLATE_LOCATION,DF_WORKING_BUCKET=$GCS_BUCKET,BQ_TARGET_DATASET=$BQ_TARGET_DATASET

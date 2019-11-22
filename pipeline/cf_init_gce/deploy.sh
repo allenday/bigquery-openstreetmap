@@ -7,4 +7,4 @@ gcloud beta functions deploy init-gce-$STAGE \
 --runtime python37 \
 --trigger-http \
 --source=$SOURCE_ROOT/pipeline/cf_init_gce \
---set-env-vars=GCE_ZONE=$GCE_ZONE,GCE_SCRIPT_URL=$GCE_SCRIPT_URL,GCE_SERVICE_ACCOUNT_EMAIL=$GCE_SERVICE_ACCOUNT_EMAIL
+--set-env-vars=STAGE=$STAGE,GCE_ZONE=$GCE_ZONE,GCE_SCRIPT_URL=$GCE_SCRIPT_URL,GCE_SERVICE_ACCOUNT_EMAIL=$GCE_SERVICE_ACCOUNT_EMAIL
