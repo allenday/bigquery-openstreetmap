@@ -1,9 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-gcloud functions deploy check-df-jobs \
+gcloud functions deploy check-df-$STAGE \
 --project $GCP_PROJECT \
 --entry-point main \
 --runtime python37 \
 --timeout 540 \
---trigger-topic $PS_TOPIC_DF_JOBS \
---set-env-vars=PUBSUB_DF_TOPIC=$PS_TOPIC_DF_JOBS,PUBSUB_BQ_TOPIC=$PS_TOPIC_LAYERS
+--trigger-topic $PS_TOPIC_DF \
+--source=$SOURCE_ROOT/pipeline/cf_check_df \
+--set-env-vars=PS_TOPIC_DF=$PS_TOPIC_DF,PS_TOPIC_LAYERS=$PS_TOPIC_LAYERS
