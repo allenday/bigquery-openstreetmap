@@ -8,11 +8,11 @@ import logging
 from googleapiclient.discovery import build
 import google.auth
 
+STAGE=os.environ['STAGE']
 GCP_PROJECT = os.environ['GCP_PROJECT']
 GCE_ZONE = os.environ['GCE_ZONE']
-SCRIPT_URL = os.environ['SCRIPT_URL']
-SERVICE_ACCOUNT_EMAIL = os.environ['SERVICE_ACCOUNT_EMAIL']
-
+GCE_SCRIPT_URL = os.environ['GCE_SCRIPT_URL']
+GCE_SERVICE_ACCOUNT_EMAIL = os.environ['GCE_SERVICE_ACCOUNT_EMAIL']
 
 def get_info(instance_name: str):
     """Gets info about GCE instance, for dev/debugging purposes
@@ -35,7 +35,7 @@ def create_vm():
     credentials, _project = google.auth.default()
     service = build('compute', 'v1', credentials=credentials, cache_discovery=False)
     body = {
-        'name': 'osmprocess',
+        'name': 'osmprocess-'+STAGE,
         'machineType': f'zones/{GCE_ZONE}/machineTypes/n1-standard-16',
         'disks': [
             {
@@ -57,11 +57,11 @@ def create_vm():
         'metadata': {'items': [
             {
                 'key': 'startup-script-url',
-                'value': SCRIPT_URL,
+                'value': GCE_SCRIPT_URL,
             }
         ]},
         'serviceAccounts': [{
-            'email': SERVICE_ACCOUNT_EMAIL,
+            'email': GCE_SERVICE_ACCOUNT_EMAIL,
             'scopes': ['https://www.googleapis.com/auth/cloud-platform']
         }]
     }

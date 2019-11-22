@@ -9,11 +9,11 @@ import logging
 from googleapiclient.discovery import build
 import google.auth
 
+STAGE=os.environ['STAGE']
 GCP_PROJECT = os.environ['GCP_PROJECT']
 DF_TEMPLATE = os.environ['DF_TEMPLATE']
-DF_WORKING_BUCKET = os.environ['DF_WORKING_BUCKET']
-BQ_DATASET = os.environ['BQ_DATASET']
-
+GCS_BUCKET = os.environ['GCS_BUCKET']
+BQ_TARGET_DATASET = os.environ['BQ_TARGET_DATASET']
 
 def init_df(bucket: str, input_filename: str):
     """Launching Dataflow job based on template
@@ -25,8 +25,8 @@ def init_df(bucket: str, input_filename: str):
     input_path = f'gs://{bucket}/{input_filename}'
 
     bq_table = input_filename.split('.')[0].split('-')[-1]
-    job_name = '{}_processing_{}'.format(bq_table, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
-    bq_path = f"{GCP_PROJECT}:{BQ_DATASET}.{bq_table}"
+    job_name = '{}-{}_processing_{}'.format(STAGE, bq_table, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+    bq_path = f"{GCP_PROJECT}:{BQ_TARGET_DATASET}.{bq_table}"
 
     body = {
         "jobName": f"{job_name}",
@@ -36,7 +36,7 @@ def init_df(bucket: str, input_filename: str):
 
         },
         "environment": {
-            "tempLocation": f"{DF_WORKING_BUCKET}/df_temp",
+            "tempLocation": f"{GCS_BUCKET}/df_temp-{STAGE}",
         },
 
     }
