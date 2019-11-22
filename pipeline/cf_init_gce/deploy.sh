@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+gcloud pubsub topics create $PS_TOPIC_DF_JOBS --project $GCP_PROJECT
+gcloud pubsub topics create $PS_TOPIC_LAYERS  --project $GCP_PROJECT
 gsutil mb $GCS_BUCKET
 gsutil mb $GCS_GEOJSON_BUCKET
 
@@ -73,7 +75,8 @@ wget $OSM_URL
 echo 'downloading completed'
 # parse
 
-./osm2geojsoncsv $OSM_FILENAME $FILENAME_BASE
+echo \"./osm2geojsoncsv \$OSM_FILENAME \$FILENAME_BASE\"
+./osm2geojsoncsv \$OSM_FILENAME \$FILENAME_BASE
 
 # upload
 find . -name '*.csv' -exec gsutil -m cp {} $GCS_GEOJSON_BUCKET \;
