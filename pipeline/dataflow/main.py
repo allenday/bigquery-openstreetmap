@@ -115,7 +115,7 @@ def run(run_local):
         'max_num_workers': 150
     }
 
-    with open('../schema/osm_features.json') as f:
+    with open('../schema/osm_csv.json') as f:
         schema_str = f.read()
     bq_schema = json.loads(schema_str)
 
