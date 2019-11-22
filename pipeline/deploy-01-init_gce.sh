@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-gcloud pubsub topics create $PS_TOPIC_DF_JOBS --project $GCP_PROJECT
-gcloud pubsub topics create $PS_TOPIC_LAYERS  --project $GCP_PROJECT
-gsutil mb $GCS_BUCKET
-gsutil mb $GCS_GEOJSON_BUCKET
-
 echo "# Configuration file for OSM import
 
 # put here the name of keys, or key=value, for ways that are assumed to be polygons if they are closed
