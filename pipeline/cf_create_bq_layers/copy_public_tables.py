@@ -9,11 +9,10 @@ from google.oauth2 import service_account
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
 GCS_BUCKET = os.environ['GCS_BUCKET'].replace('gs://', '')
-SERVICE_ACCOUNT_FILENAME = os.environ['SERVICE_ACCOUNT_FILENAME']
-BQ_DATASET = os.environ['BQ_DATASET']
-BQ_PUBLIC_DATASET = os.environ['BQ_PUBLIC_DATASET']
-BQ_PUBLIC_PROJECT = os.environ['BQ_PUBLIC_PROJECT']
-
+BQ_SERVICE_ACCOUNT_FILENAME = os.environ['BQ_SERVICE_ACCOUNT_FILENAME']
+BQ_SOURCE_DATASET = os.environ['BQ_SOURCE_DATASET']
+BQ_TARGET_DATASET = os.environ['BQ_TARGET_DATASET']
+BQ_TARGET_PROJECT = os.environ['BQ_TARGET_PROJECT']
 
 def copy_tables_to_public_dataset():
     """copies all tables from internal dataset to BigQuery public dataset
@@ -41,7 +40,7 @@ def copy_tables_to_public_dataset():
     job_config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
 
     source_dataset = bigquery.DatasetReference(GCP_PROJECT, BQ_DATASET)
-    destination_dataset = bigquery.DatasetReference(BQ_PUBLIC_PROJECT, BQ_PUBLIC_DATASET)
+    destination_dataset = bigquery.DatasetReference(BQ_TARGET_PROJECT, BQ_TARGET_DATASET)
     table_refs = []
     tables_res = bq.list_tables(source_dataset)
     for table_ref in tables_res:
@@ -52,6 +51,6 @@ def copy_tables_to_public_dataset():
         source_table = bigquery.TableReference(source_dataset, table_name)
         destination_table = bigquery.TableReference(destination_dataset, table_name)
         bq.copy_table([source_table], destination_table, job_config=job_config)
-        logging.info(f"copying table {table_name} to public dataset")
+        logging.info(f"copying table {table_name} to target dataset")
 
 

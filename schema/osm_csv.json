@@ -7,6 +7,11 @@
    },
    {
       "type":"INTEGER",
+      "name":"osm_way_id",
+      "description": "Object unique ID where feature_type=way, otherwise null."
+   },
+   {
+      "type":"INTEGER",
       "name":"osm_version",
       "description": "Version number for this object."
    },
@@ -14,11 +19,6 @@
       "type":"TIMESTAMP",
       "name":"osm_timestamp",
       "description": "Last-modified timestamp for this object."
-   },
-   {
-      "type":"TIMESTAMP",
-      "name":"feature_type",
-      "description": "GDAL feature type for this object."
    },
    {
       "type":"RECORD",
