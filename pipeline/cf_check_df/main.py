@@ -13,9 +13,10 @@ from typing import Dict
 from googleapiclient.discovery import build
 import google.auth
 
+STAGE = os.environ['STAGE']
 GCP_PROJECT = os.environ['GCP_PROJECT']
-PUBSUB_DF_TOPIC = os.environ['PUBSUB_DF_TOPIC']
-PUBSUB_BQ_TOPIC = os.environ['PUBSUB_BQ_TOPIC']
+PS_TOPIC_DF = os.environ['PS_TOPIC_DF']
+PS_TOPIC_LAYERS = os.environ['PS_TOPIC_LAYERS']
 
 
 def publish_pubsub(pubsub_topic: str, message: str):
@@ -79,7 +80,7 @@ def check_df_job_status(current_dt: datetime.datetime, df_api_response: Dict):
     elif jobs_running_no:  # jobs are still running
         logging.info(f"Still running {jobs_running_no} jobs")
         time.sleep(60 * 2)
-        publish_pubsub(PUBSUB_DF_TOPIC, " ")
+        publish_pubsub(PS_TOPIC_DF, " ")
     else:
         job_states = []
         for job in relevant_jobs:
@@ -90,7 +91,7 @@ def check_df_job_status(current_dt: datetime.datetime, df_api_response: Dict):
             raise Exception(f'There are less jobs than expected')
         if unique_job_states[0] == 'JOB_STATE_DONE':  # kick of creating layers job
             logging.info("all jobs completed")
-            publish_pubsub(PUBSUB_BQ_TOPIC, " ")
+            publish_pubsub(PS_TOPIC_LAYERS, " ")
         else:
             logging.error(f"{relevant_jobs}")
             raise Exception(f'Unknown situation with jobs')
