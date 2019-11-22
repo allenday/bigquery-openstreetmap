@@ -14,15 +14,15 @@ from google.api_core.exceptions import NotFound
 from copy_public_tables import copy_tables_to_public_dataset
 
 GCP_PROJECT = os.environ['GCP_PROJECT']
-BUCKET = os.environ['GCS_BUCKET'].replace('gs://', '')
-TABLE_NAME = os.environ['BQ_LAYERS_TABLE']
-DATASET_NAME = os.environ['BQ_DATASET']
-TEMP_DATASET_NAME = os.environ['BQ_TEMP_DATASET']
+GCS_BUCKET = os.environ['GCS_BUCKET'].replace('gs://', '')
+BQ_LAYERS_TABLE = os.environ['BQ_LAYERS_TABLE']
+BQ_TARGET_DATASET = os.environ['BQ_TARGET_DATASET']
+BQ_TEMP_DATASET = os.environ['BQ_TEMP_DATASET']
 
 bq = bigquery.Client(project=GCP_PROJECT)
 
-temp_dataset_ref = bigquery.DatasetReference(GCP_PROJECT, TEMP_DATASET_NAME)
-temp_table_ref = bigquery.TableReference(temp_dataset_ref, TABLE_NAME)
+temp_dataset_ref = bigquery.DatasetReference(GCP_PROJECT, BQ_TEMP_DATASET)
+temp_table_ref = bigquery.TableReference(temp_dataset_ref, BQ_LAYERS_TABLE)
 
 
 def create_temp_dataset():
@@ -45,7 +45,7 @@ def get_queries() -> List[str]:
 
     logging.info("getting query files")
     gcs = storage.Client(project=GCP_PROJECT)
-    bucket = gcs.bucket(BUCKET)
+    bucket = gcs.bucket(GCS_BUCKET)
     blobs = bucket.list_blobs(prefix='layered_gis')
     queries = {}
     for blob in blobs:
@@ -76,34 +76,6 @@ def create_query_jobs(queries: List[str]):
         query_job = bq.query(sql_query, job_config=job_config, location='US')
 
 
-def copy_table():
-    """Copy temporary table to final destination"""
-
-    logging.info("copy table")
-    dataset_ref = bigquery.DatasetReference(GCP_PROJECT, DATASET_NAME)
-    table_ref = bigquery.TableReference(dataset_ref, TABLE_NAME)
-    copyjob_config = bigquery.CopyJobConfig()
-    copyjob_config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
-    copyjob_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
-    bq.copy_table(temp_table_ref, table_ref, job_config=copyjob_config)
-
-
-def create_layer_partitioned_table():
-    """Creates layer partitioned table"""
-
-    table_name = f"{TABLE_NAME}"
-    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
-    PARTITION BY layer_partition
-    AS
-    SELECT
-    *,
-    `{GCP_PROJECT}.{DATASET_NAME}`.layer_partition(name) as layer_partition
-    FROM `{GCP_PROJECT}.{DATASET_NAME}.{TABLE_NAME}`"""
-
-    job_config = bigquery.QueryJobConfig()
-    query_job = bq.query(sql_query, job_config=job_config)
-
-
 def wait_jobs_completed():
     """Checks if all BigQuery jobs are completed so it can copy temp table"""
 
@@ -119,21 +91,50 @@ def wait_jobs_completed():
         time.sleep(30)
 
 
+def copy_table():
+    """Copy temporary table to final destination"""
+
+    logging.info("copy table")
+    dataset_ref = bigquery.DatasetReference(GCP_PROJECT, BQ_TARGET_DATASET)
+    table_ref = bigquery.TableReference(dataset_ref, TABLE_NAME)
+    copyjob_config = bigquery.CopyJobConfig()
+    copyjob_config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
+    copyjob_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+    bq.copy_table(temp_table_ref, table_ref, job_config=copyjob_config)
+
+
+def create_layer_partitioned_table():
+    """Creates layer partitioned table"""
+
+    table_name = f"{BQ_LAYERS_TABLE}"
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{BQ_TARGET_DATASET}.{table_name}`
+    PARTITION BY layer_partition
+    AS
+    SELECT
+    *,
+    `{GCP_PROJECT}.{BQ_TARGET_DATASET}`.layer_partition(name) as layer_partition
+    FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.{TABLE_NAME}`"""
+
+    job_config = bigquery.QueryJobConfig()
+    query_job = bq.query(sql_query, job_config=job_config)
+
+
+
 def create_features_table():
     """creates 'features' table which is union of all 5 tables"""
 
     table_name = 'features'
-    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{DATASET_NAME}.{table_name}`
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{BQ_TARGET_DATASET}.{table_name}`
     AS
-    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'point' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.points` 
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'point' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.points` 
     UNION ALL
-    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'line' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.lines`
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'line' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.lines`
     UNION ALL
-    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'multilinestring' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multilinestrings`
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'multilinestring' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.multilinestrings`
     UNION ALL
-    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'multipolygon' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.multipolygons`
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'multipolygon' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.multipolygons`
     UNION ALL
-    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'other_relation' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{DATASET_NAME}.other_relations` 
+    SELECT COALESCE(osm_id, osm_way_id) AS osm_id, osm_version, osm_timestamp, 'other_relation' AS feature_type, all_tags, geometry FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.other_relations` 
     """
     query_job = bq.query(sql_query)
 
@@ -146,7 +147,7 @@ def process():
     create_query_jobs(queries)
     wait_jobs_completed()
     copy_table()
-    create_layer_partitioned_table()
+    #create_layer_partitioned_table()
     create_features_table()
     delete_temp_dataset()
     #copy_tables_to_public_dataset()
