@@ -22,12 +22,12 @@ export PROD_BQ_TARGET_PROJECT=bigquery-public-data
 
 export DEV_BQ_SOURCE_DATASET=osm_planet
 export DEV_BQ_LAYERS_TABLE=layers
-export DEV_BQ_TEMP_DATASET=osm_temp-$STAGE
-export DEV_BQ_TARGET_DATASET=geo_openstreetmap-$STAGE
+export DEV_BQ_TEMP_DATASET=osm_temp_$STAGE
+export DEV_BQ_TARGET_DATASET=geo_openstreetmap_$STAGE
 
 export PROD_BQ_SOURCE_DATASET=osm_planet
 export PROD_BQ_LAYERS_TABLE=layers
-export PROD_BQ_TEMP_DATASET=osm_temp-$STAGE
+export PROD_BQ_TEMP_DATASET=osm_temp_$STAGE
 export PROD_BQ_TARGET_DATASET=geo_openstreetmap
 
 #GCE settings
@@ -67,5 +67,5 @@ TTT=$(echo "${STAGE}_BQ_TEMP_DATASET"   | tr '[:lower:]' '[:upper:]'); export BQ
 TTT=$(echo "${STAGE}_BQ_TARGET_DATASET" | tr '[:lower:]' '[:upper:]'); export BQ_TARGET_DATASET=${!TTT}
 
 # PubSub topics
-export PS_TOPIC_DF_JOBS=check-df-jobs-$STAGE
+export PS_TOPIC_DF=check-df-$STAGE
 export PS_TOPIC_LAYERS=create-layers-$STAGE
