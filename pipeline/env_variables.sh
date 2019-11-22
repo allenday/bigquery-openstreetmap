@@ -12,6 +12,10 @@ export BQ_TARGET_PROJECT=$BASE-$STAGE
 export DEV_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
 export PROD_OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
 
+# Source git settings
+export DEV_BRANCH=deploy
+export PROD_BRANCH=master
+
 # BQ settings
 export DEV_BQ_TARGET_PROJECT=$BASE-$STAGE
 export PROD_BQ_TARGET_PROJECT=bigquery-public-data
@@ -33,6 +37,9 @@ export PROD_GCE_SERVICE_ACCOUNT_EMAIL=65356283268-compute@developer.gserviceacco
 ###
 ### use STAGE to normalize variables for uniform referencing
 ###
+
+TTT=$(echo "${STAGE}_BRANCH"                    | tr '[:lower:]' '[:upper:]'); export BRANCH=${!TTT}
+export SOURCE_ROOT=https://source.developers.google.com/projects/$BASE-$STAGE/repos/github_allenday_bigquery-openstreetmap/moveable-aliases/$BRANCH/paths
 
 export BQ_SERVICE_ACCOUNT_FILENAME=${STAGE}_bq_osm_service_account.json
 TTT=$(echo "${STAGE}_BQ_TARGET_PROJECT"         | tr '[:lower:]' '[:upper:]'); export BQ_TARGET_PROJECT=${!TTT}
