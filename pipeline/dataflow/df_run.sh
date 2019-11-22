@@ -1,9 +1,19 @@
+#!/bin/bash
+
+# OSM_FILENAME=$(basename $OSM_URL)
+# CSV_FILENAME=${OSM_FILENAME//.osm.pbf/.csv}
+
+#Runner=DataflowRunner
+RUNNER=DirectRunner
+
+echo "
 python main.py \
---project openstreetmap-public-data-dev \
---runner DataflowRunner \
+--project $GCP_PROJECT \
+--runner $RUNNER \
 --network dataflow \
 --no_use_public_ips true \
---staging_location gs://openstreetmap-public-data-dev/df_staging \
---temp_location gs://openstreetmap-public-data-dev/df_temp \
---input gs://openstreetmap-public-data-dev-geojson/planet-latest-other_relations.geojson.csv \
---bq_destination openstreetmap-public-data-dev:osm_planet.test_load_job_2
+--staging_location $DF_STAGING_LOCATION \
+--temp_location $DF_TEMP_LOCATION \
+--input $GCS_GEOJSON_BUCKET/ \
+--bq_destination $GCP_PROJECT:$BQ_TARGET_DATASET.test_table
+"
