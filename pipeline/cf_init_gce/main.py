@@ -60,7 +60,7 @@ def create_vm():
             }
         ]},
         'serviceAccounts': [{
-            'email': SERVICE_ACCOUNT_EMAIL,
+            'email': GCE_SERVICE_ACCOUNT_EMAIL,
             'scopes': ['https://www.googleapis.com/auth/cloud-platform']
         }]
     }
