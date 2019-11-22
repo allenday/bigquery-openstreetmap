@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export GOOGLE_APPLICATION_CREDENTIALS=/Users/allenday/.gcloud/qa-openstreetmap-public-data-dev.json
+
 export BASE=openstreetmap-public-data
 export STAGE=dev
 #export STAGE=prod
