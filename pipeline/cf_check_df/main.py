@@ -15,7 +15,7 @@ import google.auth
 
 STAGE = os.environ['STAGE']
 GCP_PROJECT = os.environ['GCP_PROJECT']
-PS_TOPIC_DF = os.environ['PS_TOPIC_DF']
+PS_TOPIC_DF_JOBS = os.environ['PS_TOPIC_DF_JOBS']
 PS_TOPIC_LAYERS = os.environ['PS_TOPIC_LAYERS']
 
 
@@ -80,7 +80,7 @@ def check_df_job_status(current_dt: datetime.datetime, df_api_response: Dict):
     elif jobs_running_no:  # jobs are still running
         logging.info(f"Still running {jobs_running_no} jobs")
         time.sleep(60 * 2)
-        publish_pubsub(PS_TOPIC_DF, " ")
+        publish_pubsub(PS_TOPIC_DF_JOBS, " ")
     else:
         job_states = []
         for job in relevant_jobs:
