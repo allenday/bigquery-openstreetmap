@@ -8,14 +8,13 @@ export STAGE=dev
 
 # Project IDs
 export GCP_PROJECT=$BASE-$STAGE
-export BQ_TARGET_PROJECT=$BASE-$STAGE
 
 # Source OSM data settings
 export DEV_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
 export PROD_OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
 
 # Source git settings
-export DEV_BRANCH=deploy
+export DEV_BRANCH=master
 export PROD_BRANCH=master
 
 # BQ settings
