@@ -66,7 +66,7 @@ FILENAME_BASE=\"\${OSM_FILENAME//.osm.pbf/}\"
 # download file
 echo 'downloading'
 
-wget $OSM_URL
+axel -n 10 $OSM_URL
 echo 'downloading completed'
 # parse
 
@@ -193,7 +193,7 @@ echo 'Pin-Priority: 100' | sudo tee -a /etc/apt/preferences
 sudo apt-get -y update
 #&& apt-get -y upgrade
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install locales build-essential clang
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gdal* wget
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gdal* wget axel
 
 gsutil cp $GCS_BUCKET/osm2geojsoncsv ~/
 gsutil cp $GCS_BUCKET/osmconf.ini ~/
