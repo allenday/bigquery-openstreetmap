@@ -27,14 +27,14 @@ do
   K="${KV%%=*}"
   V="${KV##*=}"
   echo "SELECT
-  $CODE AS layer_code, 'poi_money' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  $CODE AS layer_code, 'poi_money' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
 #2701
 echo "SELECT
-  2701 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_info' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2701 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_info' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='information')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'information' AND tags.value='map')
@@ -43,30 +43,30 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' A
 
 #2704
 echo "SELECT
-  2704 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_map' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2704 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_map' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='information')
   AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'information' AND tags.value='map')" > "tourist_map.sql"
 #2705
 echo "SELECT
-  2705 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_board' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2705 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_board' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='information')
   AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'information' AND tags.value='board')" > "tourist_board.sql"
 #2706
 echo "SELECT
-  2706 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_guidepost' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2706 AS layer_code, 'poi_tourism' AS layer_class, 'tourist_guidepost' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='information')
   AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'information' AND tags.value='guidepost')" > "tourist_guidepost.sql"
 
 #2725
 echo "SELECT
-  2725 AS layer_code, 'poi_tourism' AS layer_class, 'art' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2725 AS layer_code, 'poi_tourism' AS layer_class, 'art' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tourism' AND tags.value='artwork')" > "art.sql"
 #2733
 echo "SELECT
-  2733 AS layer_code, 'poi_tourism' AS layer_class, 'archaeological' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2733 AS layer_code, 'poi_tourism' AS layer_class, 'archaeological' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'historic' AND tags.value='archaeological_site')" > "archaeological.sql"

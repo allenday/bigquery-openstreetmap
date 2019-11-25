@@ -23,14 +23,14 @@ do
   K="${KV%%=*}"
   V="${KV##*=}"
   echo "SELECT
-  $CODE AS layer_code, 'poi_leisure' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  $CODE AS layer_code, 'poi_leisure' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
 
 #2253
 echo "SELECT
-  2253 AS layer_code, 'poi_leisure' AS layer_class, 'swimming_pool' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2253 AS layer_code, 'poi_leisure' AS layer_class, 'swimming_pool' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='swimming_pool')
    OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'leisure' AND tags.value='swimming_pool')
@@ -39,6 +39,6 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' A
 
 #2254
 echo "SELECT
-  2254 AS layer_code, 'poi_leisure' AS layer_class, 'tennis_court' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  2254 AS layer_code, 'poi_leisure' AS layer_class, 'tennis_court' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'sport' AND tags.value='tennis')" > "tennis.sql"
