@@ -120,7 +120,7 @@ def deploy_features_table():
     copyjob_config = bigquery.CopyJobConfig()
     copyjob_config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     copyjob_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
-    bq.copy_table(temp_table_ref, table_ref, job_config=copyjob_config)
+    bq.copy_table(temp_table_ref, target_table_ref, job_config=copyjob_config)
 
 
 def process():
