@@ -8,4 +8,6 @@ bq mk --project_id $GCP_PROJECT $BQ_SOURCE_DATASET
 bq mk --project_id $GCP_PROJECT $BQ_TEMP_DATASET
 bq mk --project_id $GCP_PROJECT $BQ_TARGET_DATASET
 
-gsutil -m cp -r df_template $GCS_BUCKET/
+gsutil -m cp -r cf_init_df/df_template $GCS_BUCKET/
+
+gsutil -m cp -r ../layered_gis $GCS_BUCKET/
