@@ -15,7 +15,7 @@ do
   for LAYER_NAME in $LAYER_NAMES
   do
     #echo "$LAYER_CLASS/$LAYER_NAME"
-    echo "WHEN name = '$LAYER_NAME' THEN [DATE_ADD('1970-01-01', INTERVAL $N DAY)]"
+    echo "WHEN name = '$LAYER_CLASS-$LAYER_NAME' THEN [DATE_ADD('1970-01-01', INTERVAL $N DAY)]"
     K1=$N
     N=$((N+1))
   done
