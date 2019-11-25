@@ -1,5 +1,5 @@
 #!/bin/bash
-gcloud pubsub topics create $PS_TOPIC_DF_JOBS --project $GCP_PROJECT
+gcloud pubsub topics create $PS_TOPIC_DF --project $GCP_PROJECT
 gcloud pubsub topics create $PS_TOPIC_LAYERS  --project $GCP_PROJECT
 gsutil mb $GCS_BUCKET
 gsutil mb $GCS_GEOJSON_BUCKET
