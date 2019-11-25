@@ -36,7 +36,7 @@ def init_df(bucket: str, input_filename: str):
 
         },
         "environment": {
-            "tempLocation": f"{GCS_BUCKET}/df_temp-{STAGE}",
+            "tempLocation": f"{GCS_BUCKET}/df_temp",
         },
 
     }
