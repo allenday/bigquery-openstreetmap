@@ -110,9 +110,14 @@ def create_features_table():
     """
     query_job = bq.query(sql_query)
 
+def create_layers_table():
+    """Creates layer partitioned table with queries, not yet partitioned"""
+
+    table_name = f"{BQ_LAYERS_TABLE}"
+
 
 def deploy_features_table():
-    """Copy temporary table to final destination"""
+    """Copy the UNION temp features table to final destination"""
 
     logging.info("copy table")
     target_dataset_ref = bigquery.DatasetReference(GCP_PROJECT, BQ_TARGET_DATASET)
@@ -122,6 +127,20 @@ def deploy_features_table():
     copyjob_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
     bq.copy_table(temp_table_ref, target_table_ref, job_config=copyjob_config)
 
+def deploy_layers_table():
+    """Copy and partition the layers table"""
+
+    table_name = f"{BQ_LAYERS_TABLE}"
+    sql_query = f"""CREATE OR REPLACE TABLE `{GCP_PROJECT}.{BQ_TEMP_DATASET}.{table_name}`
+    PARTITION BY layer_partition
+    AS
+    SELECT *,
+    `{GCP_PROJECT}.{BQ_TARGET_DATASET}`.layer_partition(name) as layer_partition
+    FROM `{GCP_PROJECT}.{BQ_TEMP_DATASET}.{BQ_LAYERS_TABLE}`"""
+
+    job_config = bigquery.QueryJobConfig()
+    query_job = bq.query(sql_query, job_config=job_config)
+
 
 def process():
     """Complete flow"""
@@ -130,8 +149,13 @@ def process():
     queries = get_queries()
     create_query_jobs(queries)
     wait_jobs_completed()
+
     create_features_table()
+    create_layers_table()
+
     deploy_features_table()
+    deploy_layers_table()
+
     #delete_temp_dataset()
     #copy_tables_to_public_dataset()
 
