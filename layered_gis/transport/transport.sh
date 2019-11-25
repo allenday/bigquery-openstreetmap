@@ -17,7 +17,7 @@ do
   K="${KV%%=*}"
   V="${KV##*=}"
   echo "SELECT
-  $CODE AS layer_code, 'landuse' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  $CODE AS layer_code, 'landuse' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
 done
@@ -25,7 +25,7 @@ done
 #5621
 #highway=bus_stop, or public_transport=stop_position + bus=yes
 echo "SELECT
-  5621 AS layer_code, 'transport' AS layer_class, 'bus_stop' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  5621 AS layer_code, 'transport' AS layer_class, 'bus_stop' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'highway' AND tags.value='bus_stop'))
    OR (
@@ -37,7 +37,7 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'highway' 
 #5651
 #amenity=airport or aeroway=aerodrome unless type=airstrip
 echo "SELECT
-  5621 AS layer_code, 'transport' AS layer_class, 'airport' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  5621 AS layer_code, 'transport' AS layer_class, 'airport' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'type' AND tags.value='airstrip'))
    AND (
@@ -49,7 +49,7 @@ WHERE NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'type'
 #5652
 #aeroway=airfield, military=airfield, aeroway=aeroway with type=airstrip
 echo "SELECT
-  5621 AS layer_code, 'transport' AS layer_class, 'airfield' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  5621 AS layer_code, 'transport' AS layer_class, 'airfield' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'aeroway' AND tags.value='airfield'))
    OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'military' AND tags.value='airfield'))
@@ -61,6 +61,6 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'aeroway' 
 
 #5671
 echo "SELECT
-  5621 AS layer_code, 'transport' AS layer_class, 'aerialway_station' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  5621 AS layer_code, 'transport' AS layer_class, 'aerialway_station' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'aerialway' AND tags.value='station'))" > "aerialway_station.sql"

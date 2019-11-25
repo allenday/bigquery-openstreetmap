@@ -96,7 +96,7 @@ def copy_table():
 
     logging.info("copy table")
     dataset_ref = bigquery.DatasetReference(GCP_PROJECT, BQ_TARGET_DATASET)
-    table_ref = bigquery.TableReference(dataset_ref, TABLE_NAME)
+    table_ref = bigquery.TableReference(dataset_ref, BQ_LAYERS_TABLE)
     copyjob_config = bigquery.CopyJobConfig()
     copyjob_config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     copyjob_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
@@ -113,11 +113,10 @@ def create_layer_partitioned_table():
     SELECT
     *,
     `{GCP_PROJECT}.{BQ_TARGET_DATASET}`.layer_partition(name) as layer_partition
-    FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.{TABLE_NAME}`"""
+    FROM `{GCP_PROJECT}.{BQ_TARGET_DATASET}.{BQ_LAYERS_TABLE}`"""
 
     job_config = bigquery.QueryJobConfig()
     query_job = bq.query(sql_query, job_config=job_config)
-
 
 
 def create_features_table():

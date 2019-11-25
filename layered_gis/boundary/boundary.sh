@@ -26,7 +26,7 @@ do
   V="${KV##*=}"
 
   echo "SELECT
-  $CODE AS layer_code, 'boundary' AS layer_class, '$C' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
+  $CODE AS layer_code, 'boundary' AS layer_class, '$C' AS layer_name, feature_type AS gdal_type, osm_id, osm_timestamp, all_tags, geometry
 FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) AS tags WHERE tags.key = 'boundary' AND tags.value='administrative')
 AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$C.sql"

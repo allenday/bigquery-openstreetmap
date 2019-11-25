@@ -14,6 +14,7 @@ BQ_SOURCE_DATASET = os.environ['BQ_SOURCE_DATASET']
 BQ_TARGET_DATASET = os.environ['BQ_TARGET_DATASET']
 BQ_TARGET_PROJECT = os.environ['BQ_TARGET_PROJECT']
 
+
 def copy_tables_to_public_dataset():
     """copies all tables from internal dataset to BigQuery public dataset
 
@@ -24,7 +25,7 @@ def copy_tables_to_public_dataset():
     gcs = storage.Client(project=GCP_PROJECT)
 
     bucket = gcs.bucket(GCS_BUCKET)
-    sa_blob = bucket.blob(SERVICE_ACCOUNT_FILENAME)
+    sa_blob = bucket.blob(BQ_SERVICE_ACCOUNT_FILENAME)
     sa_blob.reload()
     f = BytesIO()
     sa_blob.download_to_file(f)
@@ -39,7 +40,7 @@ def copy_tables_to_public_dataset():
     job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
     job_config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
 
-    source_dataset = bigquery.DatasetReference(GCP_PROJECT, BQ_DATASET)
+    source_dataset = bigquery.DatasetReference(GCP_PROJECT, BQ_SOURCE_DATASET)
     destination_dataset = bigquery.DatasetReference(BQ_TARGET_PROJECT, BQ_TARGET_DATASET)
     table_refs = []
     tables_res = bq.list_tables(source_dataset)
