@@ -10,8 +10,8 @@ export STAGE=dev
 export GCP_PROJECT=$BASE-$STAGE
 
 # Source OSM data settings
-export DEV_OSM_URL=https://planet.openstreetmap.org/pbf/full-history/history-latest.osm.pbf
-#export DEV_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
+#export DEV_OSM_URL=https://planet.openstreetmap.org/pbf/full-history/history-latest.osm.pbf
+export DEV_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
 export PROD_OSM_URL=https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
 
 # Source git settings
