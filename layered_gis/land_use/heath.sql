@@ -10,11 +10,6 @@ SELECT
   7219 AS layer_code, 'land_use' AS layer_class, 'heath' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM
   `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'landuse' AND tags.value='heath') AND osm.id = f.osm_id
-UNION ALL
-SELECT
-  7219 AS layer_code, 'land_use' AS layer_class, 'heath' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'landuse' AND tags.value='heath') AND osm.way_id = f.osm_way_id
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'landuse' AND tags.value='heath')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
 

@@ -10,11 +10,6 @@ SELECT
   5234 AS layer_code, 'traffic' AS layer_class, 'chicane' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM
   `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'traffic_calming' AND tags.value='chicane') AND osm.id = f.osm_id
-UNION ALL
-SELECT
-  5234 AS layer_code, 'traffic' AS layer_class, 'chicane' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'traffic_calming' AND tags.value='chicane') AND osm.way_id = f.osm_way_id
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'traffic_calming' AND tags.value='chicane')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
 

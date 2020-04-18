@@ -10,13 +10,7 @@ SELECT
   1105 AS layer_code, 'boundary' AS layer_class, 'admin_level5' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM
   `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'admin_level' AND tags.value='5') AND osm.id = f.osm_id
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'admin_level' AND tags.value='5')
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) AS tags WHERE tags.key = 'boundary' AND tags.value='administrative')
-UNION ALL
-SELECT
-  1105 AS layer_code, 'boundary' AS layer_class, 'admin_level5' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'admin_level' AND tags.value='5') AND osm.way_id = f.osm_way_id
-  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) AS tags WHERE tags.key = 'boundary' AND tags.value='administrative')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
 
