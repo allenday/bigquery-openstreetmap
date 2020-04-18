@@ -1,5 +1,6 @@
 #!/bin/sh
 
+CLASS=boundary
 LAYER=(
         "1101:admin_level1:admin_level=1"
         "1102:national:admin_level=2"
@@ -25,9 +26,26 @@ do
   K="${KV%%=*}"
   V="${KV##*=}"
 
-  echo "SELECT
-  $CODE AS layer_code, 'boundary' AS layer_class, '$C' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) AS tags WHERE tags.key = 'boundary' AND tags.value='administrative')
-AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$C.sql"
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$V' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V') AND osm.id = f.osm_id
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) AS tags WHERE tags.key = 'boundary' AND tags.value='administrative')
+UNION ALL
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$V' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V') AND osm.way_id = f.osm_way_id
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) AS tags WHERE tags.key = 'boundary' AND tags.value='administrative')
+" > "$C.sql"
 done
