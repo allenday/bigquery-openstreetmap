@@ -1,11 +1,55 @@
 #!/bin/sh
 
-echo "SELECT
-  9102 AS layer_code, 'cycle_route_segment' AS layer_class, 'regional_cycle_network' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'rcn' AND tags.value='yes')" > "regional_cycle_network.sql"
+CLASS=cycle_route_segment
 
-echo "SELECT
-  9102 AS layer_code, 'cycle_route_segment' AS layer_class, 'local_cycle_network' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'lcn' AND tags.value='yes')" > "local_cycle_network.sql"
+CODE=9102
+C=regional_cycle_network
+K=rcn
+V=yes
+
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$V' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V') AND osm.id = f.osm_id
+UNION ALL
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$V' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V') AND osm.way_id = f.osm_way_id
+" > "$C.sql"
+
+CODE=9102
+C=local_cycle_network
+K=lcn
+V=yes
+
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$V' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V') AND osm.id = f.osm_id
+UNION ALL
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$V' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V') AND osm.way_id = f.osm_way_id
+" > "$C.sql"
