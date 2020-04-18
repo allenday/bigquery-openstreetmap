@@ -43,6 +43,7 @@ done
 
 CODE=5210
 N=barrier
+F=barrier
 echo "
 WITH osm AS (
   SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
@@ -68,4 +69,4 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AN
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='kissing_gate')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='cattle_grid')
   AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
-" > "$N.sql"
+" > "$F.sql"

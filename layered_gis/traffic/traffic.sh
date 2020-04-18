@@ -1,66 +1,98 @@
 #!/bin/sh
 
+CLASS=traffic
 LAYER=( 
         "5201:highway=traffic_signals"
         "5202:highway=mini_roundabout"
         "5203:highway=stop"
+        "5204:highway=crossing>crossing-highway"
+        "5204:railway=level_crossing>crossing-railway"
         "5205:highway=ford"
         "5206:highway=motorway_junction"
         "5207:highway=turning_circle"
         "5208:highway=speed_camera"
         "5209:highway=street_lamp"
         "5250:amenity=fuel"
+        "5251:highway=services>service"
         "5270:amenity=bicycle_parking"
 )
-
-
 
 for layer in "${LAYER[@]}"
 do
   CODE="${layer%%:*}"
-  KV="${layer##*:}"
-  K="${KV%%=*}"
-  V="${KV##*=}"
-  echo "SELECT
-  $CODE AS layer_code, 'traffic' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
+  KVF="${layer##*:}"
+  K="${KVF%%=*}"
+  VF="${KVF##*=}"
+  V="${VF%%>*}"
+  F="${VF##*>}"
+  N="${F%%-*}"
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "$F.sql"
 done
 
-#5204
-#highway=crossing, railway=level_crossing
-echo "SELECT
-  5204 AS layer_code, 'traffic' AS layer_class, 'crossing' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'highway' AND tags.value='crossing') OR (tags.key = 'railway' AND tags.value='level_crossing'))" > "crossing.sql"
-#5251
-echo "SELECT
-  5251 AS layer_code, 'traffic' AS layer_class, 'service' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'highway' AND tags.value='services')" > "service.sql"
-#5260
-echo "SELECT
-  5260 AS layer_code, 'traffic' AS layer_class, 'parking' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
+LAYER=( 
+        "5261:parking=surface>parking_site"
+        "5262:parking=multi-storey>parking_multistorey"
+        "5263:parking=underground>parking_underground"
+)
+for layer in "${LAYER[@]}"
+do
+  CODE="${layer%%:*}"
+  KVF="${layer##*:}"
+  K="${KVF%%=*}"
+  VF="${KVF##*=}"
+  V="${VF%%>*}"
+  F="${VF##*>}"
+  N="${F%%-*}"
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "$F.sql"
+done
+
+
+CODE=5260
+N=parking
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
 WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='surface')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='multi-storey')
-  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='underground')" > "parking.sql"
-#5261
-echo "SELECT
-  5261 AS layer_code, 'traffic' AS layer_class, 'parking_site' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='surface')" > "parking_site.sql"
-#5262
-echo "SELECT
-  5262 AS layer_code, 'traffic' AS layer_class, 'parking_multistorey' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='multi-storey')" > "parking_multistorey.sql"
-#5263
-echo "SELECT
-  5263 AS layer_code, 'traffic' AS layer_class, 'parking_underground' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='parking')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='underground')" > "parking_underground.sql"
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'parking' AND tags.value='underground')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "$F.sql"

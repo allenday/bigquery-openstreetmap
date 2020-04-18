@@ -2,6 +2,7 @@
 
 CLASS=power
 LAYER=(
+        "6204:power=pole>pole"
         "6411:source=nuclear>station_nuclear"
         "6412:source=solar>station_solar-solar"
         "6413:source=gas>station_fossil-gas"
@@ -38,9 +39,13 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'genera
 done
 
 LAYER=(
+        "6401:power=tower>tower"
         "6412:power_source=photovoltaic>station_solar-photovoltaic"
         "6414:power_source=hydro>station_water-power"
         "6415:power_source=wind>station_wind-power"
+        "6422:power=station>substation-station"
+        "6422:power=sub_station>substation-sub_station"
+        "6423:power=transformer>transformer"
 )
 for layer in "${LAYER[@]}"
 do
@@ -69,15 +74,21 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AN
 done
 
 
-echo "SELECT
-  6204 AS layer_code, 'power' AS layer_class, 'pole' AS layer_name, feature_type AS gdal_type, COALESCE(osm_id, osm_way_id) AS osm_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='pole')" > "pole.sql"
-
-echo "SELECT
-  6410 AS layer_code, 'power' AS layer_class, 'station' AS layer_name, feature_type AS gdal_type, COALESCE(osm_id, osm_way_id) AS osm_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='generator')
+CODE=6410
+N=station
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'power' AND tags.value='generator')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE
        (  tags.key = 'generator:source' AND tags.value = 'nuclear' ) 
     OR ( (tags.key = 'generator:source' AND tags.value = 'solar') OR (tags.key = 'power_source' AND tags.value = 'photovoltaic') ) 
@@ -86,20 +97,6 @@ WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND
     OR ( (tags.key = 'generator:source' AND tags.value = 'wind') OR (tags.key = 'power_source' AND tags.value = 'wind') ) 
     OR ( (tags.key = 'power' AND tags.value = 'station') OR (tags.key = 'power' AND tags.value = 'sub_station') ) 
     OR (  tags.key = 'power' AND tags.value = 'transformer' ) 
-  )" > "station.sql"
-
-echo "SELECT
-  6422 AS layer_code, 'power' AS layer_class, 'substation' AS layer_name, feature_type AS gdal_type, COALESCE(osm_id, osm_way_id) AS osm_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='station')
-   OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='sub_station')" > "substation.sql"
-
-echo "SELECT
-  6401 AS layer_code, 'power' AS layer_class, 'tower' AS layer_name, feature_type AS gdal_type, COALESCE(osm_id, osm_way_id) AS osm_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='tower')" > "tower.sql"
-
-echo "SELECT
-  6423 AS layer_code, 'power' AS layer_class, 'transformer' AS layer_name, feature_type AS gdal_type, COALESCE(osm_id, osm_way_id) AS osm_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'power' AND tags.value='transformer')" > "transformer.sql"
+  )
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "station.sql"
