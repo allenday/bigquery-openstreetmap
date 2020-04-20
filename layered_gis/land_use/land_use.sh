@@ -1,6 +1,11 @@
 #!/bin/sh
 
+CLASS=land_use
 LAYER=( 
+        "7201:landuse=forest>forest-landuse"
+        "7201:natural=wood>forest-natural"
+        "7202:leisure=park>park-park"
+        "7202:leisure=common>park-common"
         "7203:landuse=residential"
         "7204:landuse=industrial"
         "7206:landuse=cemetery"
@@ -8,6 +13,8 @@ LAYER=(
         "7208:landuse=meadow"
         "7209:landuse=commercial"
         "7210:leisure=nature_reserve"
+        "7211:leisure=recreation_ground>recreation_ground-leisure"
+        "7211:landuse=recreation_ground>recreation_ground-landuse"
         "7212:landuse=retail"
         "7213:landuse=military"
         "7214:landuse=quarry"
@@ -32,29 +39,25 @@ LAYER=(
 for layer in "${LAYER[@]}"
 do
   CODE="${layer%%:*}"
-  KV="${layer##*:}"
-  K="${KV%%=*}"
-  V="${KV##*=}"
-  echo "SELECT
-  $CODE AS layer_code, 'land_use' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
+  KVF="${layer##*:}"
+  K="${KVF%%=*}"
+  VF="${KVF##*=}"
+  V="${VF%%>*}"
+  F="${VF##*>}"
+  N="${F%%-*}"
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "$F.sql"
 done
-
-#7201
-echo "SELECT
-  7201 AS layer_code, 'land_use' AS layer_class, 'forest' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'landuse' AND tags.value='forest') OR (tags.key = 'natural' AND tags.value='wood'))" > "forest.sql"
-
-#7202
-echo "SELECT
-  7202 AS layer_code, 'land_use' AS layer_class, 'park' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'leisure' AND tags.value='park') OR (tags.key = 'leisure' AND tags.value='common'))" > "park.sql"
-
-#7211
-echo "SELECT
-  7211 AS layer_code, 'land_use' AS layer_class, 'recreation_ground' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry 
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'leisure' AND tags.value='recreation_ground') OR (tags.key = 'landuse' AND tags.value='recreation_ground'))" > "recreation_ground.sql"

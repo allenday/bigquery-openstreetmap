@@ -1,5 +1,6 @@
 #!/bin/sh
 
+CLASS=poi_shopping
 LAYER=( 
         "2501:shop=supermarket"
         "2502:shop=bakery"
@@ -13,6 +14,8 @@ LAYER=(
         "2515:shop=books"
         "2516:shop=butcher"
         "2517:shop=shoes"
+        "2518:shop=alcohol>beverages-alcohol"
+        "2518:shop=beverages>beverages-beverages"
         "2519:shop=optician"
         "2520:shop=jewelry"
         "2521:shop=gift"
@@ -27,6 +30,8 @@ LAYER=(
         "2530:shop=video"
         "2541:shop=car"
         "2542:shop=bicycle"
+        "2543:shop=doityourself>doityourself-doityourself"
+        "2543:shop=hardware>doityourself-hardware"
         "2544:shop=furniture"
         "2546:shop=computer"
         "2547:shop=garden_centre"
@@ -37,55 +42,55 @@ LAYER=(
         "2565:amenity=car_sharing"
         "2566:amenity=bicycle_rental"
         "2567:shop=travel_agency"
+"2568:shop=laundry>laundry-laundry"
+"2568:shop=dry_cleaning>laundry-dry_cleaning"
+"2591:vending=cigarettes>vending_cigarette"
+"2592:vending=parking_tickets>vending_parking"
 )
 
 for layer in "${LAYER[@]}"
 do
   CODE="${layer%%:*}"
-  KV="${layer##*:}"
-  K="${KV%%=*}"
-  V="${KV##*=}"
-  echo "SELECT
-  $CODE AS layer_code, 'poi_shopping' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
+  KVF="${layer##*:}"
+  K="${KVF%%=*}"
+  VF="${KVF##*=}"
+  V="${VF%%>*}"
+  F="${VF##*>}"
+  N="${F%%-*}"
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "$F.sql"
 done
 
-#2518
-echo "SELECT
-  2518 AS layer_code, 'poi_shopping' AS layer_class, 'beverages' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='alcohol') OR (tags.key = 'shop' AND tags.value='beverages'))" > "shop_beverages.sql"
-
-#2543
-#TODO request upstream mod, currently shows "shop=doityourself and shop=hardware" but following usual doc conventions should instead be "shop=doityourself, shop=hardware"
-echo "SELECT
-  2543 AS layer_code, 'poi_shopping' AS layer_class, 'doityourself' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value IN ('doityourself','hardware')))" > "shop_doityourself.sql"
-
-#2568
-echo "SELECT
-  2568 AS layer_code, 'poi_shopping' AS layer_class, 'laundry' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE (tags.key = 'shop' AND tags.value='laundry') OR (tags.key = 'shop' AND tags.value='dry_cleaning'))" > "shop_laundry.sql"
-
-#2590
-echo "SELECT
-  2590 AS layer_code, 'poi_shopping' AS layer_class, 'vending_cigarette' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='vending_machine')
+CODE=2590
+N=vending_machine
+F=vending_machine
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='vending_machine')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='cigarettes')
-  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='parking_tickets')" > "vending_machine.sql"
-
-#2591
-echo "SELECT
-  2591 AS layer_code, 'poi_shopping' AS layer_class, 'vending_cigarette' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='cigarettes')" > "vending_cigarette.sql"
-
-#2592
-echo "SELECT
-  2592 AS layer_code, 'poi_shopping' AS layer_class, 'vending_parking' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='parking_tickets')" > "vending_parking.sql"
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'vending' AND tags.value='parking_tickets')
+" > "$F.sql"
