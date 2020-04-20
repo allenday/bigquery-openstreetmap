@@ -1,89 +1,113 @@
 #!/bin/sh
 
+CLASS=poi_miscpoi
 LAYER=( 
+        "2901:amenity=toilets>toilet"
         "2902:amenity=bench"
         "2903:amenity=drinking_water"
         "2904:amenity=fountain"
         "2905:amenity=hunting_stand"
         "2906:amenity=waste_basket"
+        "2907:man_made=surveillance>camera_surveilance"
+        "2921:amenity=emergency_phone>emergency_phone-amenity"
+        "2921:emergency=phone>emergency_phone-emergency"
+        "2922:amenity=fire_hydrant>fire_hydrant-amenity"
+        "2922:emergency=fire_hydrant>fire_hydrant-emergency"
+        "2923:highway=emergency_access_point>emergency_access"
         "2952:man_made=water_tower"
         "2954:man_made=windmill"
         "2955:man_made=lighthouse"
         "2961:man_made=wastewater_plant"
         "2962:man_made=water_well"
+        "2963:man_made=watermill>water_mill"
         "2964:man_made=water_works"
 )
-
-
-
 
 for layer in "${LAYER[@]}"
 do
   CODE="${layer%%:*}"
-  KV="${layer##*:}"
-  K="${KV%%=*}"
-  V="${KV##*=}"
-  echo "SELECT
-  $CODE AS layer_code, 'poi_miscpoi' AS layer_class, '$V' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')" > "$V.sql"
+  KVF="${layer##*:}"
+  K="${KVF%%=*}"
+  VF="${KVF##*=}"
+  V="${VF%%>*}"
+  F="${VF##*>}"
+  N="${F%%-*}"
+  echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
+  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+" > "$F.sql"
 done
 
-#2901
-echo "SELECT
-  2901 AS layer_code, 'poi_miscpoi' AS layer_class, 'toilet' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='toilets')" > "toilet.sql"
-
-#2907
-echo "SELECT
-  2907 AS layer_code, 'poi_miscpoi' AS layer_class, 'camera_surveillance' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='surveillance')" > "camera_surveillance.sql"
-
-#2921
-echo "SELECT
-  2921 AS layer_code, 'poi_miscpoi' AS layer_class, 'emergency_phone' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE ((tags.key = 'amenity' AND tags.value='emergency_phone') OR (tags.key='emergency' AND tags.value='phone')))" > "emergency_phone.sql"
-
-#2922
-echo "SELECT
-  2922 AS layer_code, 'poi_miscpoi' AS layer_class, 'fire_hydrant' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE ((tags.key = 'amenity' AND tags.value='fire_hydrant') OR (tags.key='emergency' AND tags.value='fire_hydrant')))" > "fire_hydrant.sql"
-
-#2923
-echo "SELECT
-  2923 AS layer_code, 'poi_miscpoi' AS layer_class, 'emergency_access' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'highway' AND tags.value='emergency_access_point')" > "emergency_access.sql"
-
 #2950
-echo "SELECT
-  2950 AS layer_code, 'poi_miscpoi' AS layer_class, 'tower' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
-  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')
-  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='water_tower')
-  AND NOT EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')" > "tower.sql"
+CODE=2950
+N=tower
+F=tower
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='water_tower')
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')
+" > "$F.sql"
 
-#2951
-echo "SELECT
-  2951 AS layer_code, 'poi_miscpoi' AS layer_class, 'tower_comms' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')" > "tower_comms.sql"
+CODE=2951
+N=tower_comms
+F=tower_comms
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')
+" > "$F.sql"
 
-#2953
-echo "SELECT
-  2953 AS layer_code, 'poi_miscpoi' AS layer_class, 'tower_observation' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
-  AND EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')" > "tower_observation.sql"
-
-#2963
-echo "SELECT
-  2963 AS layer_code, 'poi_miscpoi' AS layer_class, 'water_mill' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='watermill')" > "water_mill.sql"
+CODE=2953
+N=tower_observation
+F=tower_observation
+echo "
+WITH osm AS (
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
+  UNION ALL
+  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
+)
+SELECT
+  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+FROM
+  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
+WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')
+" > "$F.sql"
