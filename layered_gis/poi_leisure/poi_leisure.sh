@@ -10,6 +10,10 @@ LAYER=(
         "2206:leisure=dog_park"
         "2251:leisure=sports_centre"
         "2252:leisure=pitch"
+        "2553:amenity=swimming_pool>swimming_pool-amenity"
+        "2553:leisure=swimming_pool>swimming_pool-leisure"
+        "2553:sport=swimming>swimming_pool-sport"
+        "2553:leisure=water_park>swimming_pool-water_park"
         "2254:sport=tennis>tennis_court"
         "2255:leisure=golf_course"
         "2256:leisure=stadium"
@@ -37,18 +41,7 @@ SELECT
   $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM
   \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
-  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
 " > "$F.sql"
 done
-
-
-#2253
-echo "SELECT
-  2253 AS layer_code, 'poi_leisure' AS layer_class, 'swimming_pool' AS layer_name, feature_type AS gdal_type, osm_id, osm_way_id, osm_timestamp, all_tags, geometry
-FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\`
-WHERE EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='swimming_pool')
-   OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'leisure' AND tags.value='swimming_pool')
-   OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'sport' AND tags.value='swimming')
-   OR EXISTS(SELECT 1 FROM UNNEST(all_tags) as tags WHERE tags.key = 'leisure' AND tags.value='water_park')" > "swimming_pool.sql"
-
