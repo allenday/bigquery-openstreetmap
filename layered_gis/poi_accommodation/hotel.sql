@@ -7,7 +7,7 @@ WITH osm AS (
   SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM `openstreetmap-public-data-dev.osm_planet.relations`
 )
 SELECT
-  2401 AS layer_code, 'poi_accomodation' AS layer_class, 'hotel' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+  2401 AS layer_code, 'poi_accommodation' AS layer_class, 'hotel' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM
   `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)

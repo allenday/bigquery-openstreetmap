@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CLASS=poi_accomodation
+CLASS=poi_accommodation
 LAYER=( 
         "2401:tourism=hotel"
         "2402:tourism=motel"
