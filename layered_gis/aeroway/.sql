@@ -6,14 +6,14 @@ WITH osm AS (
   UNION ALL
   SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM `openstreetmap-public-data-dev.osm_planet.relations`
 )
-SELECT 6702 AS layer_code, 'aeroway' AS layer_class, 'taxiway' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+SELECT 6702 AS layer_code, 'aeroway' AS layer_class, '' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.id = f.osm_id
 AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'aeroway' AND tags.value='taxiway')
 
 UNION ALL
 
-SELECT 6702 AS layer_code, 'aeroway' AS layer_class, 'taxiway' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
+SELECT 6702 AS layer_code, 'aeroway' AS layer_class, '' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.way_id = f.osm_way_id
 AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'aeroway' AND tags.value='taxiway')
