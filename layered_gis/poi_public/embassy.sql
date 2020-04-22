@@ -9,12 +9,12 @@ WITH osm AS (
 SELECT 2011 AS layer_code, 'poi_public' AS layer_class, 'embassy' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.id = f.osm_id
-AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'recycling:amenity' AND tags.value='embassy')
+AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='embassy')
 
 UNION ALL
 
 SELECT 2011 AS layer_code, 'poi_public' AS layer_class, 'embassy' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.way_id = f.osm_way_id
-AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'recycling:amenity' AND tags.value='embassy')
+AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='embassy')
 

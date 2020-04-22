@@ -7,7 +7,7 @@ LAYER=(
         "5622:amenity=bus_station"
         "5641:amenity=taxi"
         "5652:aeroway=airfield>airfield-aeroway"
-        "5652:militaryy=airfield>airfield-military"
+        "5652:military=airfield>airfield-military"
         "5655:aeroway=helipad"
         "5656:aeroway=apron"
         "5661:amenity=ferry_terminal"
@@ -52,7 +52,7 @@ common_query > "$F.sql"
 
 CODE=5652
 N=airfield
-F=airfield
+F=airfield-airstrip
 #aeroway=airfield, military=airfield, aeroway=aeroway with type=airstrip
 EXTRA_CONSTRAINTS="
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'aeroway' AND tags.value='aeroway')

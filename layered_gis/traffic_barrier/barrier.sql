@@ -10,7 +10,7 @@ SELECT 5210 AS layer_code, 'traffic' AS layer_class, 'barrier' AS layer_name, f.
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.id = f.osm_id
 
-  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='barrier')
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='gate')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='bollard')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='lift_gate')
@@ -29,7 +29,7 @@ SELECT 5210 AS layer_code, 'traffic' AS layer_class, 'barrier' AS layer_name, f.
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.way_id = f.osm_way_id
 
-  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='barrier')
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='gate')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='bollard')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'barrier' AND tags.value='lift_gate')

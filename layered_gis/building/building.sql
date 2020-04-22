@@ -8,11 +8,13 @@ WITH osm AS (
 )
 SELECT 1500 AS layer_code, 'building' AS layer_class, 'building' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'building') AND osm.id = f.osm_id
+WHERE osm.id = f.osm_id
+AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'building')
 
 UNION ALL
 
 SELECT 1500 AS layer_code, 'building' AS layer_class, 'building' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'building') AND osm.way_id = f.osm_way_id
+WHERE osm.way_id = f.osm_way_id
+AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'building')
 

@@ -3,7 +3,6 @@ source ../query_templates.sh
 
 CLASS=power
 LAYER=(
-        "6204:power=pole>pole"
         "6411:source=nuclear>station_nuclear"
         "6412:source=solar>station_solar-solar"
         "6413:source=gas>station_fossil-gas"
@@ -22,11 +21,12 @@ do
   V="${VF%%>*}"
   F="${VF##*>}"
   N="${F%%-*}"
-  EXTRA_CONSTRAINTS="AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'geneerator:$K' AND tags.value='$V')"
+  EXTRA_CONSTRAINTS="AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'generator:$K' AND tags.value='$V')"
   common_query > "$F.sql"
 done
 
 LAYER=(
+        "6204:power=pole>pole"
         "6401:power=tower>tower"
         "6412:power_source=photovoltaic>station_solar-photovoltaic"
         "6414:power_source=hydro>station_water-power"
