@@ -9,12 +9,22 @@ WITH osm AS (
 SELECT 2922 AS layer_code, 'poi_miscpoi' AS layer_class, 'fire_hydrant' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.id = f.osm_id
-AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='fire_hydrant')
+
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amnenity' AND tags.value='fire_hydrant')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'emergency' AND tags.value='fire_hydrant')
+  )
 
 UNION ALL
 
 SELECT 2922 AS layer_code, 'poi_miscpoi' AS layer_class, 'fire_hydrant' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
 FROM `openstreetmap-public-data-dev.osm_planet.features` AS f, osm
 WHERE osm.way_id = f.osm_way_id
-AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='fire_hydrant')
+
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amnenity' AND tags.value='fire_hydrant')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'emergency' AND tags.value='fire_hydrant')
+  )
 

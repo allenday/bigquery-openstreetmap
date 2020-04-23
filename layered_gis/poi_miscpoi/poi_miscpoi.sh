@@ -10,10 +10,6 @@ LAYER=(
         "2905:amenity=hunting_stand"
         "2906:amenity=waste_basket"
         "2907:man_made=surveillance>camera_surveillance"
-        "2921:amenity=emergency_phone>emergency_phone-amenity"
-        "2921:emergency=phone>emergency_phone-emergency"
-        "2922:amenity=fire_hydrant>fire_hydrant-amenity"
-        "2922:emergency=fire_hydrant>fire_hydrant-emergency"
         "2923:highway=emergency_access_point>emergency_access"
         "2952:man_made=water_tower"
         "2954:man_made=windmill"
@@ -61,4 +57,27 @@ F=tower_observation
 EXTRA_CONSTRAINTS="
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')"
+common_query > "$F.sql"
+
+
+CODE=2921
+N=emergency_phone
+F=emergency_phone
+EXTRA_CONSTRAINTS="
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amnenity' AND tags.value='emergency_phone')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'emergency' AND tags.value='phone')
+  )"
+common_query > "$F.sql"
+
+CODE=2922
+N=fire_hydrant
+F=fire_hydrant
+EXTRA_CONSTRAINTS="
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amnenity' AND tags.value='fire_hydrant')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'emergency' AND tags.value='fire_hydrant')
+  )"
 common_query > "$F.sql"
