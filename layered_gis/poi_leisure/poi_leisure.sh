@@ -11,10 +11,6 @@ LAYER=(
         "2206:leisure=dog_park"
         "2251:leisure=sports_centre"
         "2252:leisure=pitch"
-        "2553:amenity=swimming_pool>swimming_pool-amenity"
-        "2553:leisure=swimming_pool>swimming_pool-leisure"
-        "2553:sport=swimming>swimming_pool-sport"
-        "2553:leisure=water_park>swimming_pool-water_park"
         "2254:sport=tennis>tennis_court"
         "2255:leisure=golf_course"
         "2256:leisure=stadium"
@@ -33,3 +29,18 @@ do
   EXTRA_CONSTRAINTS="AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')"
   common_query > "$F.sql"
 done
+
+CODE=2950
+N=swimming_pool
+F=swimming_pool
+EXTRA_CONSTRAINTS="
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amenity' AND tags.value='swimming_pool')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'leisure' AND tags.value='swimming_pool')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'sport' AND tags.value='swimming')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'leisure' AND tags.value='water_park')
+  )"
+common_query > "$F.sql"
