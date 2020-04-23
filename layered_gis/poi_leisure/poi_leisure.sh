@@ -30,7 +30,7 @@ do
   common_query > "$F.sql"
 done
 
-CODE=2950
+CODE=2253
 N=swimming_pool
 F=swimming_pool
 EXTRA_CONSTRAINTS="
