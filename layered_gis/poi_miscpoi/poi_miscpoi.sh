@@ -1,4 +1,5 @@
 #!/bin/sh
+source ../query_templates.sh
 
 CLASS=poi_miscpoi
 LAYER=( 
@@ -8,11 +9,7 @@ LAYER=(
         "2904:amenity=fountain"
         "2905:amenity=hunting_stand"
         "2906:amenity=waste_basket"
-        "2907:man_made=surveillance>camera_surveilance"
-        "2921:amenity=emergency_phone>emergency_phone-amenity"
-        "2921:emergency=phone>emergency_phone-emergency"
-        "2922:amenity=fire_hydrant>fire_hydrant-amenity"
-        "2922:emergency=fire_hydrant>fire_hydrant-emergency"
+        "2907:man_made=surveillance>camera_surveillance"
         "2923:highway=emergency_access_point>emergency_access"
         "2952:man_made=water_tower"
         "2954:man_made=windmill"
@@ -32,82 +29,57 @@ do
   V="${VF%%>*}"
   F="${VF##*>}"
   N="${F%%-*}"
-  echo "
-WITH osm AS (
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
-)
-SELECT
-  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
-WHERE EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')
-  AND COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
-" > "$F.sql"
+  EXTRA_CONSTRAINTS="AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = '$K' AND tags.value='$V')"
+  common_query > "$F.sql"
 done
 
-#2950
 CODE=2950
 N=tower
 F=tower
-echo "
-WITH osm AS (
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
-)
-SELECT
-  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
-WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+EXTRA_CONSTRAINTS="
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='water_tower')
   AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')
-" > "$F.sql"
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='windmill')
+  AND NOT EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='lighthouse')"
+common_query > "$F.sql"
 
 CODE=2951
 N=tower_comms
 F=tower_comms
-echo "
-WITH osm AS (
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
-)
-SELECT
-  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
-WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+EXTRA_CONSTRAINTS="
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
-  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')
-" > "$F.sql"
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='communication')"
+common_query > "$F.sql"
 
 CODE=2953
 N=tower_observation
 F=tower_observation
-echo "
-WITH osm AS (
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.nodes\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, CAST(id AS STRING) AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.ways\`
-  UNION ALL
-  SELECT CAST(id AS STRING) AS id, null AS way_id, all_tags FROM \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.relations\`
-)
-SELECT
-  $CODE AS layer_code, '$CLASS' AS layer_class, '$N' AS layer_name, f.feature_type AS gdal_type, f.osm_id, f.osm_way_id, f.osm_timestamp, osm.all_tags, f.geometry
-FROM
-  \`${GCP_PROJECT}.${BQ_SOURCE_DATASET}.features\` AS f, osm
-WHERE COALESCE(osm.id,osm.way_id) = COALESCE(f.osm_id,f.osm_way_id)
+EXTRA_CONSTRAINTS="
   AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'man_made' AND tags.value='tower')
-  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')
-" > "$F.sql"
+  AND EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'tower:type' AND tags.value='observation')"
+common_query > "$F.sql"
+
+
+CODE=2921
+N=emergency_phone
+F=emergency_phone
+EXTRA_CONSTRAINTS="
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amnenity' AND tags.value='emergency_phone')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'emergency' AND tags.value='phone')
+  )"
+common_query > "$F.sql"
+
+CODE=2922
+N=fire_hydrant
+F=fire_hydrant
+EXTRA_CONSTRAINTS="
+  AND (
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'amnenity' AND tags.value='fire_hydrant')
+      OR
+    EXISTS(SELECT 1 FROM UNNEST(osm.all_tags) as tags WHERE tags.key = 'emergency' AND tags.value='fire_hydrant')
+  )"
+common_query > "$F.sql"
